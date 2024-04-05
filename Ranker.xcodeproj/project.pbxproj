@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		447237F62BBEA40E0073B4D4 /* WordSorterContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 447237F52BBEA40E0073B4D4 /* WordSorterContentView.swift */; };
+		447237F82BBEA4AA0073B4D4 /* WordSorterViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 447237F72BBEA4AA0073B4D4 /* WordSorterViewModel.swift */; };
+		447237FA2BBEA5140073B4D4 /* Word.swift in Sources */ = {isa = PBXBuildFile; fileRef = 447237F92BBEA5140073B4D4 /* Word.swift */; };
+		447237FC2BBEB9B70073B4D4 /* CustomSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 447237FB2BBEB9B70073B4D4 /* CustomSlider.swift */; };
+		447237FF2BBF72D10073B4D4 /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = 447237FE2BBF72D10073B4D4 /* SQLite */; };
+		447238012BBF72FA0073B4D4 /* DatabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 447238002BBF72FA0073B4D4 /* DatabaseManager.swift */; };
 		44ACF6042BBB38F50076C786 /* RankerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44ACF6032BBB38F50076C786 /* RankerApp.swift */; };
 		44ACF6062BBB38F50076C786 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44ACF6052BBB38F50076C786 /* ContentView.swift */; };
 		44ACF6082BBB38F50076C786 /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44ACF6072BBB38F50076C786 /* Item.swift */; };
@@ -35,6 +41,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		447237F52BBEA40E0073B4D4 /* WordSorterContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordSorterContentView.swift; sourceTree = "<group>"; };
+		447237F72BBEA4AA0073B4D4 /* WordSorterViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordSorterViewModel.swift; sourceTree = "<group>"; };
+		447237F92BBEA5140073B4D4 /* Word.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Word.swift; sourceTree = "<group>"; };
+		447237FB2BBEB9B70073B4D4 /* CustomSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSlider.swift; sourceTree = "<group>"; };
+		447238002BBF72FA0073B4D4 /* DatabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseManager.swift; sourceTree = "<group>"; };
 		44ACF6002BBB38F50076C786 /* Ranker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ranker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		44ACF6032BBB38F50076C786 /* RankerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RankerApp.swift; sourceTree = "<group>"; };
 		44ACF6052BBB38F50076C786 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -53,6 +64,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				447237FF2BBF72D10073B4D4 /* SQLite in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -101,6 +113,11 @@
 				44ACF6072BBB38F50076C786 /* Item.swift */,
 				44ACF6092BBB38F60076C786 /* Assets.xcassets */,
 				44ACF60B2BBB38F60076C786 /* Preview Content */,
+				447237F52BBEA40E0073B4D4 /* WordSorterContentView.swift */,
+				447237F72BBEA4AA0073B4D4 /* WordSorterViewModel.swift */,
+				447237F92BBEA5140073B4D4 /* Word.swift */,
+				447237FB2BBEB9B70073B4D4 /* CustomSlider.swift */,
+				447238002BBF72FA0073B4D4 /* DatabaseManager.swift */,
 			);
 			path = Ranker;
 			sourceTree = "<group>";
@@ -146,6 +163,9 @@
 			dependencies = (
 			);
 			name = Ranker;
+			packageProductDependencies = (
+				447237FE2BBF72D10073B4D4 /* SQLite */,
+			);
 			productName = Ranker;
 			productReference = 44ACF6002BBB38F50076C786 /* Ranker.app */;
 			productType = "com.apple.product-type.application";
@@ -218,6 +238,9 @@
 				Base,
 			);
 			mainGroup = 44ACF5F72BBB38F50076C786;
+			packageReferences = (
+				447237FD2BBF72D10073B4D4 /* XCRemoteSwiftPackageReference "SQLite.swift" */,
+			);
 			productRefGroup = 44ACF6012BBB38F50076C786 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -260,9 +283,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				447238012BBF72FA0073B4D4 /* DatabaseManager.swift in Sources */,
 				44ACF6062BBB38F50076C786 /* ContentView.swift in Sources */,
+				447237FC2BBEB9B70073B4D4 /* CustomSlider.swift in Sources */,
 				44ACF6082BBB38F50076C786 /* Item.swift in Sources */,
+				447237F62BBEA40E0073B4D4 /* WordSorterContentView.swift in Sources */,
 				44ACF6042BBB38F50076C786 /* RankerApp.swift in Sources */,
+				447237F82BBEA4AA0073B4D4 /* WordSorterViewModel.swift in Sources */,
+				447237FA2BBEA5140073B4D4 /* Word.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -586,6 +614,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		447237FD2BBF72D10073B4D4 /* XCRemoteSwiftPackageReference "SQLite.swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/stephencelis/SQLite.swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.15.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		447237FE2BBF72D10073B4D4 /* SQLite */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 447237FD2BBF72D10073B4D4 /* XCRemoteSwiftPackageReference "SQLite.swift" */;
+			productName = SQLite;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 44ACF5F82BBB38F50076C786 /* Project object */;
 }

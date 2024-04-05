@@ -7,26 +7,57 @@
 
 import SwiftUI
 import SwiftData
+//
+//@main
+//struct RankerApp: App {
+//    var sharedModelContainer: ModelContainer = {
+//        let schema = Schema([
+//            Item.self,
+//        ])
+//        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+//
+//        do {
+//            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+//        } catch {
+//            fatalError("Could not create ModelContainer: \(error)")
+//        }
+//    }()
+//
+//    var body: some Scene {
+//        WindowGroup {
+////            ContentView()
+////            WordSorterContentView()
+//            WordSorterContentView(viewModel: WordSorterViewModel(modelContainer: sharedModelContainer))
+//
+//        }
+//        .modelContainer(sharedModelContainer)
+//    }
+//}
+
+//import SwiftUI
+
+//@main
+//struct RankerApp: App {
+//    var body: some Scene {
+//        WindowGroup {
+//            NavigationView {
+//                WordSorterContentView()
+//            }
+//        }
+//    }
+//}
+//
+//
+//import SwiftUI
 
 @main
 struct RankerApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
-
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            NavigationView {
+                WordSorterContentView()
+            }
+            .navigationViewStyle(StackNavigationViewStyle()) // This forces a full-width style on iPad
         }
-        .modelContainer(sharedModelContainer)
     }
 }

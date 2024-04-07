@@ -9,10 +9,13 @@ import Foundation
 import SwiftUI
 
 
+
+import SwiftUI
+
 struct WordSorterContentView: View {
     @StateObject var viewModel = WordSorterViewModel()
-//    @StateObject var viewModel = WordSorterViewModel()
-       @State private var maxWidth: CGFloat = 100 // A default value; you might adjust this based on your content
+    @State private var maxWidth: CGFloat = 100 // Adjust based on content
+
     var body: some View {
         VStack {
             ScrollView {
@@ -40,15 +43,58 @@ struct WordSorterContentView: View {
                             }
                     }
                 }
-                .padding()
             }
             Button("Next") {
-                viewModel.saveRankings()
+                viewModel.saveRankings()  // This will also load the next batch
             }
         }
     }
 }
 
+
+
+
+//
+//struct WordSorterContentView: View {
+//    @StateObject var viewModel = WordSorterViewModel()
+////    @StateObject var viewModel = WordSorterViewModel()
+//       @State private var maxWidth: CGFloat = 100 // A default value; you might adjust this based on your content
+//    var body: some View {
+//        VStack {
+//            ScrollView {
+//                LazyVGrid(columns: [
+//                    GridItem(.fixed(maxWidth), alignment: .leading),
+//                    GridItem(.flexible(), alignment: .leading),
+//                    GridItem(.fixed(30))
+//                ], alignment: .leading, spacing: 20) {
+//                    ForEach($viewModel.words) { $word in
+//                        Text(word.name)
+//                            .lineLimit(1)
+//                            .background(GeometryReader { geometry in
+//                                Color.clear.onAppear {
+//                                    maxWidth = max(maxWidth, geometry.size.width)
+//                                }
+//                            })
+//
+//                        CustomSlider(value: $word.rank)
+//                            .frame(height: 20)
+//
+//                        Image(systemName: word.isNotable ? "star.fill" : "star")
+//                            .foregroundColor(.yellow)
+//                            .onTapGesture {
+//                                word.isNotable.toggle()
+//                            }
+//                    }
+//                }
+//                .padding()
+//            }
+//            Button("Next") {
+//                viewModel.saveRankings()
+//            }
+//        }
+//    }
+//}
+//
 
 
 

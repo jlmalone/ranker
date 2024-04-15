@@ -1,10 +1,3 @@
-//
-//  WordSorterViewModel.swift
-//  Ranker
-//
-//  Created by Joseph Malone on 4/4/24.
-//
-
 
 import Foundation
 import Combine
@@ -28,7 +21,7 @@ class WordSorterViewModel: ObservableObject {
         print("Load next batch")
         DispatchQueue.main.async {
             print("Dispatch async")
-            self.words = self.databaseManager.fetchUnreviewedWords(batchSize: 8)
+            self.words = self.databaseManager.fetchUnreviewedWords(batchSize: 20)
             print("words are \(self.words)")
             self.dataVersion += 1 // Increment to signal change
             print("dataversion \(self.dataVersion)")

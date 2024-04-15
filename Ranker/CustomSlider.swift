@@ -1,10 +1,3 @@
-//
-//  CustomSlider.swift
-//  Ranker
-//
-//  Created by Joseph Malone on 4/4/24.
-//
-
 import SwiftUI
 
 struct CustomSlider: View {

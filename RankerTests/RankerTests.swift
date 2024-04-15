@@ -1,9 +1,3 @@
-//
-//  RankerTests.swift
-//  RankerTests
-//
-//  Created by Joseph Malone on 4/2/24.
-//
 
 import XCTest
 @testable import Ranker

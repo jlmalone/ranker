@@ -7,15 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4458D3072BC6F005003FF70A /* ProgressViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4458D3062BC6F005003FF70A /* ProgressViewModel.swift */; };
+		4458D3092BC6F052003FF70A /* ProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4458D3082BC6F052003FF70A /* ProgressView.swift */; };
 		447237F62BBEA40E0073B4D4 /* WordSorterContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 447237F52BBEA40E0073B4D4 /* WordSorterContentView.swift */; };
 		447237F82BBEA4AA0073B4D4 /* WordSorterViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 447237F72BBEA4AA0073B4D4 /* WordSorterViewModel.swift */; };
 		447237FA2BBEA5140073B4D4 /* Word.swift in Sources */ = {isa = PBXBuildFile; fileRef = 447237F92BBEA5140073B4D4 /* Word.swift */; };
 		447237FC2BBEB9B70073B4D4 /* CustomSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 447237FB2BBEB9B70073B4D4 /* CustomSlider.swift */; };
 		447237FF2BBF72D10073B4D4 /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = 447237FE2BBF72D10073B4D4 /* SQLite */; };
 		447238012BBF72FA0073B4D4 /* DatabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 447238002BBF72FA0073B4D4 /* DatabaseManager.swift */; };
+		4472383B2BC352230073B4D4 /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4472383A2BC352230073B4D4 /* ShareSheet.swift */; };
 		44ACF6042BBB38F50076C786 /* RankerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44ACF6032BBB38F50076C786 /* RankerApp.swift */; };
-		44ACF6062BBB38F50076C786 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44ACF6052BBB38F50076C786 /* ContentView.swift */; };
-		44ACF6082BBB38F50076C786 /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44ACF6072BBB38F50076C786 /* Item.swift */; };
 		44ACF60A2BBB38F60076C786 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 44ACF6092BBB38F60076C786 /* Assets.xcassets */; };
 		44ACF60D2BBB38F60076C786 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 44ACF60C2BBB38F60076C786 /* Preview Assets.xcassets */; };
 		44ACF6172BBB38F60076C786 /* RankerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44ACF6162BBB38F60076C786 /* RankerTests.swift */; };
@@ -41,15 +42,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		4458D3062BC6F005003FF70A /* ProgressViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressViewModel.swift; sourceTree = "<group>"; };
+		4458D3082BC6F052003FF70A /* ProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressView.swift; sourceTree = "<group>"; };
 		447237F52BBEA40E0073B4D4 /* WordSorterContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordSorterContentView.swift; sourceTree = "<group>"; };
 		447237F72BBEA4AA0073B4D4 /* WordSorterViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordSorterViewModel.swift; sourceTree = "<group>"; };
 		447237F92BBEA5140073B4D4 /* Word.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Word.swift; sourceTree = "<group>"; };
 		447237FB2BBEB9B70073B4D4 /* CustomSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSlider.swift; sourceTree = "<group>"; };
 		447238002BBF72FA0073B4D4 /* DatabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseManager.swift; sourceTree = "<group>"; };
+		4472383A2BC352230073B4D4 /* ShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareSheet.swift; sourceTree = "<group>"; };
 		44ACF6002BBB38F50076C786 /* Ranker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ranker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		44ACF6032BBB38F50076C786 /* RankerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RankerApp.swift; sourceTree = "<group>"; };
-		44ACF6052BBB38F50076C786 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		44ACF6072BBB38F50076C786 /* Item.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Item.swift; sourceTree = "<group>"; };
 		44ACF6092BBB38F60076C786 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		44ACF60C2BBB38F60076C786 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		44ACF6122BBB38F60076C786 /* RankerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RankerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -109,8 +111,6 @@
 			isa = PBXGroup;
 			children = (
 				44ACF6032BBB38F50076C786 /* RankerApp.swift */,
-				44ACF6052BBB38F50076C786 /* ContentView.swift */,
-				44ACF6072BBB38F50076C786 /* Item.swift */,
 				44ACF6092BBB38F60076C786 /* Assets.xcassets */,
 				44ACF60B2BBB38F60076C786 /* Preview Content */,
 				447237F52BBEA40E0073B4D4 /* WordSorterContentView.swift */,
@@ -118,6 +118,9 @@
 				447237F92BBEA5140073B4D4 /* Word.swift */,
 				447237FB2BBEB9B70073B4D4 /* CustomSlider.swift */,
 				447238002BBF72FA0073B4D4 /* DatabaseManager.swift */,
+				4472383A2BC352230073B4D4 /* ShareSheet.swift */,
+				4458D3062BC6F005003FF70A /* ProgressViewModel.swift */,
+				4458D3082BC6F052003FF70A /* ProgressView.swift */,
 			);
 			path = Ranker;
 			sourceTree = "<group>";
@@ -284,13 +287,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				447238012BBF72FA0073B4D4 /* DatabaseManager.swift in Sources */,
-				44ACF6062BBB38F50076C786 /* ContentView.swift in Sources */,
 				447237FC2BBEB9B70073B4D4 /* CustomSlider.swift in Sources */,
-				44ACF6082BBB38F50076C786 /* Item.swift in Sources */,
 				447237F62BBEA40E0073B4D4 /* WordSorterContentView.swift in Sources */,
+				4458D3072BC6F005003FF70A /* ProgressViewModel.swift in Sources */,
 				44ACF6042BBB38F50076C786 /* RankerApp.swift in Sources */,
 				447237F82BBEA4AA0073B4D4 /* WordSorterViewModel.swift in Sources */,
 				447237FA2BBEA5140073B4D4 /* Word.swift in Sources */,
+				4472383B2BC352230073B4D4 /* ShareSheet.swift in Sources */,
+				4458D3092BC6F052003FF70A /* ProgressView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -454,6 +458,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Ranker/Preview Content\"";
+				DEVELOPMENT_TEAM = 44SCLSYCZZ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -482,6 +487,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Ranker/Preview Content\"";
+				DEVELOPMENT_TEAM = 44SCLSYCZZ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

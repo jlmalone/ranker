@@ -11,9 +11,27 @@ class DatabaseManager {
     let notable = Expression<Bool>("notable")
     let reviewed = Expression<Bool>("reviewed")
     
+    
+    // New word association database
+    private var assocDb: Connection?
+    let associationsTable = Table("associations")
+    let assocId = Expression<Int64>("assocId")
+    let assocWord = Expression<String>("assocWord")
+    let assocRank = Expression<Double>("assocRank")
+    let assocNotable = Expression<Bool>("assocNotable")
+    
+    let recordingsTable = Table("recordings")
+    let recordingId = Expression<String>("recordingId")
+    let assocRecordingWord = Expression<String>("assocRecordingWord")
+    let transcription = Expression<String>("transcription")
+    
     init() {
         setupDatabase()
         createWordsTable()
+        populateInitialDataIfNeeded()
+        createAssociationsDatabase()
+        createAssociationsTable()
+        createRecordingsTable()
         populateInitialDataIfNeeded()
     }
 
@@ -74,6 +92,112 @@ class DatabaseManager {
         }
         
         printTableSchema(tableName : "words")
+    }
+    
+    
+    // MARK: - New Association Database Methods
+    private func createAssociationsDatabase() {
+        do {
+            let path = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first!
+            assocDb = try Connection("\(path)/assoc.sqlite3")
+        } catch {
+            print("Unable to set up association database: \(error)")
+        }
+    }
+
+    private func createAssociationsTable() {
+        let createTable = associationsTable.create(ifNotExists: true) { table in
+            table.column(assocId, primaryKey: .autoincrement)
+            table.column(assocWord, unique: true)
+            table.column(assocRank, defaultValue: 0.5)
+            table.column(assocNotable, defaultValue: false)
+        }
+        
+        do {
+            try assocDb?.run(createTable)
+            print("Created associations table or already exists.")
+        } catch {
+            print("Failed to create associations table: \(error)")
+        }
+    }
+
+    private func createRecordingsTable() {
+        let createTable = recordingsTable.create(ifNotExists: true) { table in
+            table.column(recordingId, primaryKey: true)
+            table.column(assocRecordingWord)
+            table.column(transcription)
+        }
+        
+        do {
+            try assocDb?.run(createTable)
+            print("Created recordings table or already exists.")
+        } catch {
+            print("Failed to create recordings table: \(error)")
+        }
+    }
+    
+    // Fetch words for association ranking
+    func fetchUnrankedAssociations(batchSize: Int) -> [Word] {
+        do {
+            guard let assocDb = assocDb else { return [] }
+            let query = associationsTable.order(assocId).limit(batchSize)
+            let rows = try assocDb.prepare(query)
+            var result: [Word] = []
+            for row in rows {
+                let wordItem = Word(
+                    name: row[assocWord],
+                    rank: row[assocRank],
+                    isNotable: row[assocNotable]
+                )
+                result.append(wordItem)
+            }
+            return result
+        } catch {
+            print("Fetch unranked associations failed: \(error)")
+            return []
+        }
+    }
+    
+    
+    //TODO alt
+//    func fetchUnrankedAssociations(batchSize: Int) -> [Word] {
+//        do {
+//            let query = wordsTable.filter(reviewed == false).limit(batchSize)
+//            let rows = try db.prepare(query)
+//            var results = [Word]()
+//            for row in rows {
+//                let wordItem = Word(name: row[word], rank: row[rank], isNotable: row[notable])
+//                results.append(wordItem)
+//            }
+//            print("Fetched associations: \(results)")
+//            return results
+//        } catch {
+//            print("Error fetching associations: \(error)")
+//            return []
+//        }
+//    }
+    
+    func updateAssociation(word: Word) {
+        let wordRow = associationsTable.filter(self.assocWord == word.name)
+        do {
+            if try assocDb?.run(wordRow.update(assocRank <- word.rank, assocNotable <- word.isNotable)) ?? 0 > 0 {
+                print("Updated association for: \(word.name)")
+            } else {
+                print("Association word not found: \(word.name)")
+            }
+        } catch {
+            print("Update failed for association \(word.name): \(error)")
+        }
+    }
+
+    // Store voice recording metadata
+    func saveRecordingMetadata(recordingId: String, word: String, transcription: String) {
+        do {
+            let insert = recordingsTable.insert(self.recordingId <- recordingId, self.assocRecordingWord <- word, self.transcription <- transcription)
+            try assocDb?.run(insert)
+        } catch {
+            print("Failed to save recording metadata: \(error)")
+        }
     }
     
     private func populateInitialDataIfNeeded() {
@@ -139,28 +263,7 @@ class DatabaseManager {
             return []
         }
     }
-//
-//    func fetchUnreviewedWords(batchSize: Int) -> [Word] {
-//        print("Fetch unreviewed hit")
-//        do {
-//            let query = wordsTable.filter(reviewed == false).limit(batchSize)
-//            guard let db = db else { return [] }
-//            let rows = try db.prepare(query)
-//            var result: [Word] = []
-//            for row in rows {
-//                let wordItem = Word(
-//                    name: row[word],
-//                    rank: row[rank],
-//                    isNotable: row[reviewed]
-//                )
-//                result.append(wordItem)
-//            }
-//            return result
-//        } catch {
-//            print("Fetch failed: \(error)")
-//            return []
-//        }
-//    }
+
     func updateWord(word: Word) {
         print("update word")
         let wordRow = wordsTable.filter(self.word == word.name)
@@ -200,4 +303,28 @@ class DatabaseManager {
             return 0
         }
     }
+    
+    func searchWords(query: String) -> [Word] {
+        do {
+            let queryPattern = "%\(query.lowercased())%" // SQL LIKE pattern
+            let filteredWords = wordsTable.filter(word.like(queryPattern))
+            
+            let rows = try db.prepare(filteredWords)
+            var result: [Word] = []
+            for row in rows {
+                let wordItem = Word(
+                    name: row[word],
+                    rank: row[rank],
+                    isNotable: row[notable]
+                )
+                result.append(wordItem)
+            }
+            return result
+        } catch {
+            print("Search failed: \(error)")
+            return []
+        }
+    }
+    
+    
 }

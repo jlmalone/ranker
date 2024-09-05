@@ -22,6 +22,9 @@
 		44ACF6172BBB38F60076C786 /* RankerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44ACF6162BBB38F60076C786 /* RankerTests.swift */; };
 		44ACF6212BBB38F60076C786 /* RankerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44ACF6202BBB38F60076C786 /* RankerUITests.swift */; };
 		44ACF6232BBB38F60076C786 /* RankerUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44ACF6222BBB38F60076C786 /* RankerUITestsLaunchTests.swift */; };
+		83910BF42C894662000FE4DF /* WordAssociationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83910BF32C894662000FE4DF /* WordAssociationView.swift */; };
+		83910BF62C894691000FE4DF /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83910BF52C894691000FE4DF /* SearchView.swift */; };
+		83910BF82C8946F9000FE4DF /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83910BF72C8946F9000FE4DF /* SettingsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -59,6 +62,9 @@
 		44ACF61C2BBB38F60076C786 /* RankerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RankerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		44ACF6202BBB38F60076C786 /* RankerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RankerUITests.swift; sourceTree = "<group>"; };
 		44ACF6222BBB38F60076C786 /* RankerUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RankerUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		83910BF32C894662000FE4DF /* WordAssociationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordAssociationView.swift; sourceTree = "<group>"; };
+		83910BF52C894691000FE4DF /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
+		83910BF72C8946F9000FE4DF /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -121,6 +127,9 @@
 				4472383A2BC352230073B4D4 /* ShareSheet.swift */,
 				4458D3062BC6F005003FF70A /* ProgressViewModel.swift */,
 				4458D3082BC6F052003FF70A /* ProgressView.swift */,
+				83910BF32C894662000FE4DF /* WordAssociationView.swift */,
+				83910BF52C894691000FE4DF /* SearchView.swift */,
+				83910BF72C8946F9000FE4DF /* SettingsView.swift */,
 			);
 			path = Ranker;
 			sourceTree = "<group>";
@@ -290,11 +299,14 @@
 				447237FC2BBEB9B70073B4D4 /* CustomSlider.swift in Sources */,
 				447237F62BBEA40E0073B4D4 /* WordSorterContentView.swift in Sources */,
 				4458D3072BC6F005003FF70A /* ProgressViewModel.swift in Sources */,
+				83910BF42C894662000FE4DF /* WordAssociationView.swift in Sources */,
 				44ACF6042BBB38F50076C786 /* RankerApp.swift in Sources */,
 				447237F82BBEA4AA0073B4D4 /* WordSorterViewModel.swift in Sources */,
 				447237FA2BBEA5140073B4D4 /* Word.swift in Sources */,
 				4472383B2BC352230073B4D4 /* ShareSheet.swift in Sources */,
+				83910BF82C8946F9000FE4DF /* SettingsView.swift in Sources */,
 				4458D3092BC6F052003FF70A /* ProgressView.swift in Sources */,
+				83910BF62C894691000FE4DF /* SearchView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,74 +1,77 @@
-//
-//  WordAssociationView.swift
-//  Ranker
-//
-//  Created by Agent Malone on 9/4/24.
-//
-
-import Foundation
 import SwiftUI
+import Foundation
 
 struct WordAssociationView: View {
-    @StateObject var viewModel = WordAssociationViewModel()
-    @State private var recordingID = UUID().uuidString
-    @State private var transcription = ""
+    @State private var associationText: String = ""
+    @State private var isStarred: Bool = false
+    @State private var audioFile: String = ""  // Add an audioFile property
+    @State private var isRecording: Bool = false  // Add a state for recording status
     
-    var word: Word
 
+    
+    
+    var mainWordId: Int64  // Pass the main word's ID to associate words
+    let databaseManager = DatabaseManager()  // Instantiate the DatabaseManager
+    
     var body: some View {
         VStack {
-            Text("Word Association for \(word.name)")
-                .font(.headline)
+            TextField("Enter associated word", text: $associationText)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+
+            Toggle(isOn: $isStarred) {
+                Text("Star this association")
+            }
+            .padding()
+            Button("Add Association") {
+                // Correcting the argument names to match the function signature
+                databaseManager.addWordAssociation(word: "example", associationText: associationText.lowercased(), isStarred: isStarred)
+            }
+
+            .padding()
             
-            CustomSlider(value: $viewModel.association.rank)
-                .frame(height: 20)
-            
-            HStack {
-                TextField("Transcription", text: $transcription)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                Button("Save Transcription") {
-                    viewModel.saveTranscription(word: word.name, transcription: transcription)
+            // Button to start recording
+            Button(isRecording ? "Stop Recording" : "Start Recording") {
+                if isRecording {
+                    stopRecording()  // Call stopRecording function when user stops recording
+                } else {
+                    startRecording()  // Call startRecording when user starts
                 }
             }
+            .padding()
             
-            Button("Record Voice") {
-                viewModel.startRecording(for: word.name)
+            // Placeholder for playing audio
+            if !audioFile.isEmpty {
+                Button("Play Recording") {
+                    playAudio(audioFile)  // Add function to play the recorded audio
+                }
+                .padding()
             }
-            
-            Button("Save Recording") {
-                viewModel.saveRecording(recordingID: recordingID, word: word.name)
-            }
-            
-            Spacer()
         }
-        .padding()
-    }
-}
-
-class WordAssociationViewModel: ObservableObject {
-    @Published var association = Word(name: "", rank: 0.5)
-    
-    private let databaseManager = DatabaseManager()
-
-    func startRecording(for word: String) {
-        // Implement voice recording logic
+        .navigationTitle("Word Association")
     }
 
-    func saveRecording(recordingID: String, word: String) {
-        // Save the recording metadata in the database
-        databaseManager.saveRecordingMetadata(recordingId: recordingID, word: word, transcription: "")
+    // Start recording functionality
+    func startRecording() {
+        // Your implementation here
+        isRecording = true
+        print("Recording started")
     }
     
-    //TODO this was generated and looks worthless
-    func saveRecording(for word: String) {
-        // Logic to save recording
+    // Stop recording functionality
+    func stopRecording() {
+        isRecording = false
         let uniqueID = UUID().uuidString
-        let filename = "\(word)_\(uniqueID).m4a"
-        print("Saving recording to filename: \(filename)")
-        // Add the rest of your logic here TODO
-    }
+        audioFile = "recording_\(uniqueID).m4a"
 
-    func saveTranscription(word: String, transcription: String) {
-        databaseManager.saveRecordingMetadata(recordingId: UUID().uuidString, word: word, transcription: transcription)
+        // Save metadata to the database
+        databaseManager.saveRecordingMetadata(recordingId: uniqueID, word: "associated_word_here", transcription: "transcription_text_here", audioFileName: audioFile, isStarred: isStarred)
+        
+        print("Recording stopped, saved as \(audioFile)")
+    }
+    // Play the recorded audio
+    func playAudio(_ file: String) {
+        // Your implementation for playing the audio
+        print("Playing audio: \(file)")
     }
 }

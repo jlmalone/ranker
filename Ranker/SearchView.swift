@@ -20,9 +20,10 @@ struct SearchView: View {
 
             List {
                 ForEach(viewModel.searchResults) { word in
-                    NavigationLink(destination: WordAssociationView(word: word)) {
+                    NavigationLink(destination: WordAssociationView(mainWordId: word.id)) {
                         Text(word.name)
                     }
+
                 }
             }
             .onChange(of: searchText) { oldText, newText in // Use two-parameter version

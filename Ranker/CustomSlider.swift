@@ -11,21 +11,23 @@ struct CustomSlider: View {
                 Rectangle() // Represents the slider track.
                     .foregroundColor(.gray.opacity(0.3))
                     .frame(height: 5)
-                
+
                 Rectangle() // Represents the filled portion of the slider track.
                     .foregroundColor(.blue)
-                    .frame(width: CGFloat(value) * geometry.size.width, height: 5)
-                
+                    .frame(width: CGFloat(self.normalizedValue() * geometry.size.width), height: 5)
+
                 Circle() // Represents the slider thumb.
                     .foregroundColor(.blue)
                     .frame(width: 20, height: 20)
-                    .offset(x: CGFloat(value) * geometry.size.width - 10)
+                    .offset(x: CGFloat(self.normalizedValue() * geometry.size.width - 10))
             }
             .contentShape(Rectangle()) // Makes the entire slider area responsive to input.
             .gesture(
                 DragGesture(minimumDistance: 0) // Captures both drag and tap gestures.
-                    .onChanged({ value in
-                        let sliderPosition = value.location.x / geometry.size.width
+                    .onChanged({ gestureValue in
+                        let width = geometry.size.width
+                        guard width > 0 else { return }
+                        let sliderPosition = gestureValue.location.x / width
                         let newValue = sliderPosition * (range.upperBound - range.lowerBound) + range.lowerBound
                         self.value = newValue.clamped(to: range)
                         onEditingChanged(true)
@@ -35,6 +37,11 @@ struct CustomSlider: View {
         }
         .frame(height: 20) // Sets a fixed height for the slider.
     }
+
+    func normalizedValue() -> Double {
+        guard range.upperBound - range.lowerBound != 0 else { return 0 }
+        return (value - range.lowerBound) / (range.upperBound - range.lowerBound)
+    }
 }
 
 extension Double {
@@ -43,3 +50,4 @@ extension Double {
         return min(max(self, limits.lowerBound), limits.upperBound)
     }
 }
+

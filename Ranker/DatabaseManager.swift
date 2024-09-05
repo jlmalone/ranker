@@ -25,16 +25,27 @@ class DatabaseManager {
     let assocRecordingWord = Expression<String>("assocRecordingWord")
     let transcription = Expression<String>("transcription")
     
+
+    let associationText = Expression<String>("associationText")
+    let audioFile = Expression<String>("audioFile") // Add this line
+    let isStarred = Expression<Bool>("isStarred") // Add this line
+    
+    
     init() {
         setupDatabase()
-        createWordsTable()
+       
         populateInitialDataIfNeeded()
         createAssociationsDatabase()
-        createAssociationsTable()
-        createRecordingsTable()
+       
+        createTables()
         populateInitialDataIfNeeded()
     }
 
+    private func createTables() {
+        createWordsTable()
+        createAssociationsTable() // Include this line
+        createRecordingsTable() // Include this line
+    }
     
     private func setupDatabase() {
         do {
@@ -126,6 +137,7 @@ class DatabaseManager {
             table.column(recordingId, primaryKey: true)
             table.column(assocRecordingWord)
             table.column(transcription)
+            table.column(audioFile)
         }
         
         do {
@@ -145,6 +157,7 @@ class DatabaseManager {
             var result: [Word] = []
             for row in rows {
                 let wordItem = Word(
+                    id: row[assocId],
                     name: row[assocWord],
                     rank: row[assocRank],
                     isNotable: row[assocNotable]
@@ -190,11 +203,53 @@ class DatabaseManager {
         }
     }
 
-    // Store voice recording metadata
-    func saveRecordingMetadata(recordingId: String, word: String, transcription: String) {
+//    // Store voice recording metadata
+//    func saveRecordingMetadata(recordingId: String, word: String, transcription: String) {
+//        do {
+//            let insert = recordingsTable.insert(self.recordingId <- recordingId, self.assocRecordingWord <- word, self.transcription <- transcription)
+//            try assocDb?.run(insert)
+//        } catch {
+//            print("Failed to save recording metadata: \(error)")
+//        }
+//    }
+    
+    // Method to add word associations
+    func addWordAssociation(word: String, associationText: String, isStarred: Bool) {
         do {
-            let insert = recordingsTable.insert(self.recordingId <- recordingId, self.assocRecordingWord <- word, self.transcription <- transcription)
-            try assocDb?.run(insert)
+            let insert = associationsTable.insert(self.word <- word, self.associationText <- associationText, self.isStarred <- isStarred)
+            try db?.run(insert)
+            print("Word association added successfully.")
+        } catch {
+            print("Failed to add word association: \(error)")
+        }
+    }
+    
+//    func saveRecordingMetadata(recordingId: String, word: String, transcription: String, audioFileName: String?, isStarred: Bool) {
+//        do {
+//            let insert = recordingsTable.insert(
+//                self.recordingId <- recordingId,
+//                self.assocRecordingWord <- word.lowercased(),
+//                self.transcription <- transcription,
+//                self.audioFile <- audioFileName,
+//                self.isStarred <- isStarred
+//            )
+//            try db?.run(insert)
+//        } catch {
+//            print("Failed to save recording metadata: \(error)")
+//        }
+//    }
+
+    
+    func saveRecordingMetadata(recordingId: String, word: String, transcription: String, audioFileName: String?, isStarred: Bool) {
+        do {
+            let insert = recordingsTable.insert(
+                self.recordingId <- recordingId,
+                self.assocRecordingWord <- word.lowercased(),
+                self.transcription <- transcription,
+                self.audioFile <- (audioFileName ?? ""),  // Unwrapping audioFileName
+                self.isStarred <- isStarred
+            )
+            try db?.run(insert)
         } catch {
             print("Failed to save recording metadata: \(error)")
         }
@@ -251,6 +306,7 @@ class DatabaseManager {
             var result: [Word] = []
             for row in rows {
                 let wordItem = Word(
+                    id: row[id],  // Add this line
                     name: row[word],
                     rank: row[rank],
                     isNotable: row[notable]
@@ -263,6 +319,32 @@ class DatabaseManager {
             return []
         }
     }
+//    
+//    func fetchUnreviewedWords(batchSize: Int) -> [Word] {
+//        do {
+//            guard let db = db else {
+//                print("Database connection is nil.")
+//                return []
+//            }
+//
+//            // Use SQL's random() function directly in the order clause
+//            let query = wordsTable.filter(reviewed == false).order(SQLite.Expression<Int64>.random()).limit(batchSize)
+//            let rows = try db.prepare(query)
+//            var result: [Word] = []
+//            for row in rows {
+//                let wordItem = Word(
+//                    name: row[word],
+//                    rank: row[rank],
+//                    isNotable: row[notable]
+//                )
+//                result.append(wordItem)
+//            }
+//            return result
+//        } catch {
+//            print("Fetch failed: \(error)")
+//            return []
+//        }
+//    }
 
     func updateWord(word: Word) {
         print("update word")
@@ -303,9 +385,13 @@ class DatabaseManager {
             return 0
         }
     }
-    
     func searchWords(query: String) -> [Word] {
         do {
+            guard let db = db else {
+                print("Database connection is nil.")
+                return []
+            }
+
             let queryPattern = "%\(query.lowercased())%" // SQL LIKE pattern
             let filteredWords = wordsTable.filter(word.like(queryPattern))
             
@@ -313,6 +399,7 @@ class DatabaseManager {
             var result: [Word] = []
             for row in rows {
                 let wordItem = Word(
+                    id: row[id],  // Add this line
                     name: row[word],
                     rank: row[rank],
                     isNotable: row[notable]
@@ -325,6 +412,7 @@ class DatabaseManager {
             return []
         }
     }
+
     
     
 }

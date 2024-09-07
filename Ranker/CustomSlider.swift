@@ -11,11 +11,11 @@ struct CustomSlider: View {
                 Rectangle() // Represents the slider track.
                     .foregroundColor(.gray.opacity(0.3))
                     .frame(height: 5)
-                
+
                 Rectangle() // Represents the filled portion of the slider track.
                     .foregroundColor(.blue)
                     .frame(width: CGFloat(value) * geometry.size.width, height: 5)
-                
+
                 Circle() // Represents the slider thumb.
                     .foregroundColor(.blue)
                     .frame(width: 20, height: 20)

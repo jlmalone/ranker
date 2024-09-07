@@ -6,7 +6,7 @@ import SwiftUI
 struct WordSorterContentView: View {
     @StateObject var viewModel = WordSorterViewModel()
     @State private var maxWidth: CGFloat = 100 // Adjust based on content
-    @State private var showingShareSheet = false // State to control the ShareSheet 
+    @State private var showingShareSheet = false // State to control the ShareSheet
     @State private var showProgressView = false // State to control navigation to ProgressView
 
 
@@ -16,11 +16,7 @@ struct WordSorterContentView: View {
         VStack {
             // Custom Title Bar
             HStack {
-//                Text("Word Sorter") // Your title
-//                    .font(.largeTitle)
-//                    .padding()
-//                Spacer()
-                
+
                 Button(action: {
                     self.showProgressView = true
                 }) {
@@ -31,7 +27,7 @@ struct WordSorterContentView: View {
                 .background(NavigationLink(destination: ProgressView(), isActive: $showProgressView) { EmptyView() })
 
                 Spacer()
-                
+
                 Button(action: {
                     self.showingShareSheet = true
                 }) {
@@ -40,7 +36,7 @@ struct WordSorterContentView: View {
                         .padding()
                 }
             }
-            
+
             // Your content
             ScrollView {
                 LazyVGrid(columns: [
@@ -56,10 +52,10 @@ struct WordSorterContentView: View {
                                     maxWidth = max(maxWidth, geometry.size.width)
                                 }
                             })
-                        
+
                         CustomSlider(value: $word.rank)
                             .frame(height: 20)
-                        
+
                         Image(systemName: word.isNotable ? "star.fill" : "star")
                             .foregroundColor(.yellow)
                             .onTapGesture {
@@ -68,7 +64,7 @@ struct WordSorterContentView: View {
                     }
                 }
             }
-            
+
             Button("Next") {
                 viewModel.saveRankings()  // This will also load the next batch
             }.padding()
@@ -81,60 +77,6 @@ struct WordSorterContentView: View {
         }
     }
 }
-
-//
-//
-//struct WordSorterContentView: View {
-//    @StateObject var viewModel = WordSorterViewModel()
-//    @State private var maxWidth: CGFloat = 100 // Adjust based on content
-//    @State private var showingShareSheet = false // State to control the ShareSheet presentation
-//    let databaseManager = DatabaseManager()
-//    var body: some View {
-//        VStack {
-//            ScrollView {
-//                LazyVGrid(columns: [
-//                    GridItem(.fixed(maxWidth), alignment: .leading),
-//                    GridItem(.flexible(), alignment: .leading),
-//                    GridItem(.fixed(30))
-//                ], alignment: .leading, spacing: 20) {
-//                    ForEach($viewModel.words) { $word in
-//                        Text(word.name)
-//                            .lineLimit(1)
-//                            .background(GeometryReader { geometry in
-//                                Color.clear.onAppear {
-//                                    maxWidth = max(maxWidth, geometry.size.width)
-//                                }
-//                            })
-//
-//                        CustomSlider(value: $word.rank)
-//                            .frame(height: 20)
-//
-//                        Image(systemName: word.isNotable ? "star.fill" : "star")
-//                            .foregroundColor(.yellow)
-//                            .onTapGesture {
-//                                word.isNotable.toggle()
-//                            }
-//                    }
-//                }
-//            }
-//            HStack{
-//                Button("Next") {
-//                    viewModel.saveRankings()  // This will also load the next batch
-//                }.padding()
-//                
-//                Button(action: {
-//                    self.showingShareSheet = true
-//                }) {
-//                    Text("Share Database")
-//                } .padding().sheet(isPresented: $showingShareSheet) {
-//                    if let dbPath = databaseManager.databasePath() { // Ensure you have a method to get the database path
-//                        ShareSheet(items: [URL(fileURLWithPath: dbPath)])
-//                    }
-//                }
-//            }
-//        }.padding()
-//    }
-//}
 
 
 // Function to get the path to your database

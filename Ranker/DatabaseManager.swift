@@ -4,7 +4,7 @@ import SQLite
 class DatabaseManager {
     private var db: Connection?
 
-    let wordsTable = Table("words")
+    let wordsTable = Table("fullwords")
     let id = Expression<Int64>("id")
     let word = Expression<String>("word")
     let rank = Expression<Double>("rank")
@@ -17,22 +17,29 @@ class DatabaseManager {
         populateInitialDataIfNeeded()
     }
 
+//    // Centralized function for the database path
+//     func databasePath() -> String {
+//        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+//        let documentsDirectory = paths[0]
+//        return documentsDirectory.appendingPathComponent("db.sqlite3").path
+//    }
+
+
+    // Centralized function for the database path
+     func databasePath() -> String {
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        let documentsDirectory = paths[0]
+        // Remove the extra "db.sqlite3" from the path here
+        return documentsDirectory.appendingPathComponent("db_full_words.sqlite3").path
+    }
 
     private func setupDatabase() {
         do {
-            let path = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first!
-            db = try Connection("\(path)/db.sqlite3")
+            let path = databasePath()  // Use the centralized function
+            db = try Connection(path)
         } catch {
             print("Unable to set up database: \(error)")
         }
-    }
-
-    // Method to return the database file path
-    func databasePath() -> String? {
-        let paths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
-        let documentsDirectory = paths[0]
-        let dbPath = "\(documentsDirectory)/db.sqlite3"
-        return dbPath
     }
 
     func printTableSchema(tableName: String) {
@@ -73,7 +80,7 @@ class DatabaseManager {
             print("Failed to create table: \(error)")
         }
 
-        printTableSchema(tableName : "words")
+        printTableSchema(tableName : "fullwords")
     }
 
     private func populateInitialDataIfNeeded() {
@@ -81,31 +88,6 @@ class DatabaseManager {
         if !alreadyPopulated {
             populateInitialData()
             UserDefaults.standard.set(true, forKey: "isDatabasePopulated")
-        }
-    }
-
-    private func populateInitialData() {
-        do {
-            try db?.transaction {
-                // Populate with all 3-letter combinations
-                let letters = Array("abcdefghijklmnopqrstuvwxyz")
-                for first in letters {
-                    for second in letters {
-                        for third in letters {
-                            let combination = "\(first)\(second)\(third)"
-                            try insertWordIfNotExists(name: combination, rank: 0.5)
-                        }
-                    }
-                }
-
-                // Populate with numbers 1 to 9999 (1 to 4-digit numbers)
-                for number in 1...9999 {
-                    try insertWordIfNotExists(name: "\(number)", rank: 0.5)
-                }
-            }
-            print("Initial data populated successfully.")
-        } catch {
-            print("Failed to populate initial data: \(error)")
         }
     }
 
@@ -159,7 +141,6 @@ class DatabaseManager {
         }
     }
 
-
     func countReviewedWords() -> Int {
         do {
             let count = try db?.scalar(wordsTable.filter(reviewed == true).count) ?? 0
@@ -177,6 +158,33 @@ class DatabaseManager {
         } catch {
             print("Count unreviewed words failed: \(error)")
             return 0
+        }
+    }
+
+    private func populateInitialData() {
+        do {
+            try db?.transaction {
+                // List of 100 dummy words to prepopulate the database
+                let dummyWords = [
+                    "alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta", "iota", "kappa",
+                    "lambda", "mu", "nu", "xi", "omicron", "pi", "rho", "sigma", "tau", "upsilon",
+                    "phi", "chi", "psi", "omega", "apple", "banana", "cherry", "date", "elderberry", "fig",
+                    "grape", "honeydew", "kiwi", "lemon", "mango", "nectarine", "orange", "papaya", "quince", "raspberry",
+                    "strawberry", "tangerine", "ugli", "vanilla", "watermelon", "xigua", "yam", "zucchini", "almond", "basil",
+                    "cinnamon", "dill", "elderflower", "fennel", "ginger", "horseradish", "ivy", "jasmine", "kumquat", "lime",
+                    "mint", "nutmeg", "oregano", "parsley", "quinoa", "rosemary", "sage", "thyme", "uva", "valerian",
+                    "walnut", "xanthan", "yarrow", "zatar", "azalea", "begonia", "cactus", "daffodil", "echinacea", "fern",
+                    "gardenia", "hibiscus", "iris", "jasmine", "kaffir", "lavender", "magnolia", "narcissus", "oak", "poppy"
+                ]
+
+                // Insert dummy words into the database
+                for word in dummyWords {
+                    try insertWordIfNotExists(name: word, rank: 0.5)
+                }
+            }
+            print("Dummy data populated successfully.")
+        } catch {
+            print("Failed to populate dummy data: \(error)")
         }
     }
 }

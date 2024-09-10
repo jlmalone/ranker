@@ -109,6 +109,7 @@ class DatabaseManager {
             var result: [Word] = []
             for row in rows {
                 let wordItem = Word(
+                    id: row[id],
                     name: row[word],
                     rank: row[rank],
                     isNotable: row[notable]
@@ -187,4 +188,40 @@ class DatabaseManager {
             print("Failed to populate dummy data: \(error)")
         }
     }
+
+
+
+    //TODO TEMP. This function was imported. we are not sure we will use it yet
+    func searchWords(query: String) -> [Word] {
+        do {
+            guard let db = db else {
+                print("Database connection is nil.")
+                return []
+            }
+
+            let queryPattern = "%\(query.lowercased())%" // SQL LIKE pattern
+            let filteredWords = wordsTable.filter(word.like(queryPattern))
+
+            let rows = try db.prepare(filteredWords)
+            var result: [Word] = []
+            for row in rows {
+
+                let wordItem = Word(
+                    id: row[id],  // Add this line
+                    name: row[word],
+                    rank: row[rank],
+                    isNotable: row[notable]
+                )
+                result.append(wordItem)
+            }
+            return result
+        } catch {
+            print("Search failed: \(error)")
+            return []
+        }
+    }
+
+
+
+
 }

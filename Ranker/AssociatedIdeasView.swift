@@ -1,6 +1,22 @@
 import Foundation
 import SwiftUI
 
+
+// TODO this is now crashing sort it out
+//Failed to request default share mode for fileURL:file:///Users/joseph.malone/Library/Developer/CoreSimulator/Devices/4DE38375-3220-4ED5-A84D-35205FAD1371/data/Containers/Data/Application/6FAD5243-30E4-42E4-8AF0-1E5D05494FFF/Documents/db_full_words.sqlite3 error:Error Domain=NSOSStatusErrorDomain Code=-10814 "(null)" UserInfo={_LSLine=1608, _LSFunction=runEvaluator}
+//Only support loading options for CKShare and SWY types.
+//error fetching item for URL:file:///Users/joseph.malone/Library/Developer/CoreSimulator/Devices/4DE38375-3220-4ED5-A84D-35205FAD1371/data/Containers/Data/Application/6FAD5243-30E4-42E4-8AF0-1E5D05494FFF/Documents/db_full_words.sqlite3 : Error Domain=NSCocoaErrorDomain Code=256 "The file couldn’t be opened."
+//Collaboration: error loading metadata for documentURL:file:///Users/joseph.malone/Library/Developer/CoreSimulator/Devices/4DE38375-3220-4ED5-A84D-35205FAD1371/data/Containers/Data/Application/6FAD5243-30E4-42E4-8AF0-1E5D05494FFF/Documents/db_full_words.sqlite3 error:Error Domain=NSFileProviderInternalErrorDomain Code=0 "No valid file provider found from URL file:///Users/joseph.malone/Library/Developer/CoreSimulator/Devices/4DE38375-3220-4ED5-A84D-35205FAD1371/data/Containers/Data/Application/6FAD5243-30E4-42E4-8AF0-1E5D05494FFF/Documents/db_full_words.sqlite3." UserInfo={NSLocalizedDescription=No valid file provider found from URL file:///Users/joseph.malone/Library/Developer/CoreSimulator/Devices/4DE38375-3220-4ED5-A84D-35205FAD1371/data/Containers/Data/Application/6FAD5243-30E4-42E4-8AF0-1E5D05494FFF/Documents/db_full_words.sqlite3.}
+//Error acquiring assertion: <Error Domain=RBSServiceErrorDomain Code=1 "(originator doesn't have entitlement com.apple.runningboard.primitiveattribute AND originator doesn't have entitlement com.apple.runningboard.assertions.frontboard AND target is not running or doesn't have entitlement com.apple.runningboard.trustedtarget AND Target not hosted by originator)" UserInfo={NSLocalizedFailureReason=(originator doesn't have entitlement com.apple.runningboard.primitiveattribute AND originator doesn't have entitlement com.apple.runningboard.assertions.frontboard AND target is not running or doesn't have entitlement com.apple.runningboard.trustedtarget AND Target not hosted by originator)}>
+//connection invalidated
+//Created table or already exists.
+//Column name: 3, Type: notable, Not null: INTEGER, Default Value: 1, Primary Key: 0
+//Column name: 4, Type: reviewed, Not null: INTEGER, Default Value: 1, Primary Key: 0
+//Created table or already exists.
+//Column name: 3, Type: notable, Not null: INTEGER, Default Value: 1, Primary Key: 0
+//Column name: 4, Type: reviewed, Not null: INTEGER, Default Value: 1, Primary Key: 0
+//This app has crashed because it attempted to access privacy-sensitive data without a usage description.  The app's Info.plist must contain an NSMicrophoneUsageDescription key with a string value explaining to the user how the app uses this data.
+
 struct AssociatedIdeasView: View {
     let word: String  // The word passed from the previous screen
 
@@ -27,15 +43,7 @@ struct AssociatedIdeasView: View {
             Text("\(word)")
                 .padding()
 
-            RecorderWidgetView()
-
-            //TODO I want a recorder widget here. It should have a record button, when i hit the record button i should see some
-            //animated feedback that the widget is recording along with a time indicator for the length of time recorded so far. A stop button should be visible when and only when it is recording.
-            //after i hit the stop button I should see a spinner or pending indicator while a transcript is being processed from the recording.
-            //that transcript should be generated.
-            //That transcript when ready should become visible in a scrollable textview with only 6 lines of small space separated text all lowercase.
-            //A reset button should now be visible because a recording has occurred. If i click reset i get
-            //a confirmation dialog that throws away the recording and the transcript.
+            RecorderWidgetView(seedWord: word)
 
             Spacer()
 
@@ -62,83 +70,3 @@ struct AssociatedIdeasView: View {
     }
 }
 
-
-//
-//
-//import SwiftUI
-//import Foundation
-//
-//struct WordAssociationView: View {
-//    @State private var associationText: String = ""
-//    @State private var isStarred: Bool = false
-//    @State private var audioFile: String = ""  // Add an audioFile property
-//    @State private var isRecording: Bool = false  // Add a state for recording status
-//
-//
-//
-//
-//    var mainWordId: Int64  // Pass the main word's ID to associate words
-//    let databaseManager = DatabaseManager()  // Instantiate the DatabaseManager
-//
-//    var body: some View {
-//        VStack {
-//            TextField("Enter associated word", text: $associationText)
-//                .textFieldStyle(RoundedBorderTextFieldStyle())
-//                .padding()
-//
-//            Toggle(isOn: $isStarred) {
-//                Text("Star this association")
-//            }
-//            .padding()
-//            Button("Add Association") {
-//                // Correcting the argument names to match the function signature
-//                databaseManager.addWordAssociation(word: "example", associationText: associationText.lowercased(), isStarred: isStarred)
-//            }
-//
-//            .padding()
-//
-//            // Button to start recording
-//            Button(isRecording ? "Stop Recording" : "Start Recording") {
-//                if isRecording {
-//                    stopRecording()  // Call stopRecording function when user stops recording
-//                } else {
-//                    startRecording()  // Call startRecording when user starts
-//                }
-//            }
-//            .padding()
-//
-//            // Placeholder for playing audio
-//            if !audioFile.isEmpty {
-//                Button("Play Recording") {
-//                    playAudio(audioFile)  // Add function to play the recorded audio
-//                }
-//                .padding()
-//            }
-//        }
-//        .navigationTitle("Word Association")
-//    }
-//
-//    // Start recording functionality
-//    func startRecording() {
-//        // Your implementation here
-//        isRecording = true
-//        print("Recording started")
-//    }
-//
-//    // Stop recording functionality
-//    func stopRecording() {
-//        isRecording = false
-//        let uniqueID = UUID().uuidString
-//        audioFile = "recording_\(uniqueID).m4a"
-//
-//        // Save metadata to the database
-//        databaseManager.saveRecordingMetadata(recordingId: uniqueID, word: "associated_word_here", transcription: "transcription_text_here", audioFileName: audioFile, isStarred: isStarred)
-//
-//        print("Recording stopped, saved as \(audioFile)")
-//    }
-//    // Play the recorded audio
-//    func playAudio(_ file: String) {
-//        // Your implementation for playing the audio
-//        print("Playing audio: \(file)")
-//    }
-//}

@@ -4,8 +4,9 @@ import Combine
 
 
 class WordSorterViewModel: ObservableObject {
-//    @Published var words: [Word] = []
 
+    // TODO i dont really understand the published annotation. I get the impression that references to it can change
+    // the value of it
     @Published var words: [Word] = []
      @Published var dataVersion = 0 // Add this line
 

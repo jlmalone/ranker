@@ -5,6 +5,8 @@ struct WordSorterContentView: View {
     @StateObject var viewModel = WordSorterViewModel()
     @State private var maxWidth: CGFloat = 100 // Adjust based on content
     @State private var showingShareSheet = false // State to control the ShareSheet
+
+    @State private var showingSearchView = false // State to control the SearchSheet
     @State private var showProgressView = false // State to control navigation to ProgressView
 
     let databaseManager = DatabaseManager()
@@ -26,6 +28,14 @@ struct WordSorterContentView: View {
                     Spacer()
 
                     Button(action: {
+                        self.showingSearchView = true
+                    }) {
+                        Image(systemName: "magnifyingglass") // change to System image for search eg magnifying glass. TODO check
+                            .imageScale(.large)
+                            .padding()
+                    }
+
+                    Button(action: {
                         self.showingShareSheet = true
                     }) {
                         Image(systemName: "square.and.arrow.up") // System image for sharing
@@ -42,6 +52,12 @@ struct WordSorterContentView: View {
                         GridItem(.fixed(30))
                     ], alignment: .leading, spacing: 20) {
                         ForEach($viewModel.words) { $word in
+
+                            //TODO the below three widgets should be consolidated into a single widget
+                            //we will call it WordRankWidget
+                            //This can then be reused in other places.
+
+
                             // NavigationLink to navigate to AssociatedIdeasView on click
                             NavigationLink(destination: AssociatedIdeasView(word: word.name)) {
                                 Text(word.name)

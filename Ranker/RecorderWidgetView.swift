@@ -2,9 +2,9 @@ import Foundation
 
 import SwiftUI
 
-//TODO this is good but it needs to actually start recording audio
+//TODO
 //
-//make it so
+
 //after the recording, a transcript needs to be generated.
 //both should be saved.
 //it should be saved on the device using a separate FileManager (TODO)
@@ -141,7 +141,43 @@ struct RecorderWidgetView: View {
         }
     }
 
-    // Define the startRecording method
+
+    // Helper function to get the current date as a string
+    private func currentDateString() -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd-HH-mm-ss"
+        return dateFormatter.string(from: Date())
+    }
+
+    // Reset recording and delete the file
+    private func resetRecording() {
+        // Show a confirmation dialog before deletion
+        let alert = UIAlertController(title: "Reset Recording", message: "Are you sure you want to delete the recording?", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { _ in
+            // Delete the recorded audio file
+            if let audioFilename = audioFilename {
+                do {
+                    try FileManager.default.removeItem(at: audioFilename)
+                    print("Recording deleted.")
+                } catch {
+                    print("Failed to delete recording: \(error.localizedDescription)")
+                }
+            }
+
+            // Reset the state
+            recordingDuration = 0
+            transcript = nil
+            showReset = false
+            audioFilename = nil
+        }))
+
+        // Present the dialog (this code would be added in a UIKit environment)
+        UIApplication.shared.windows.first?.rootViewController?.present(alert, animated: true, completion: nil)
+    }
+
+
+    // Start recording with custom file names
     private func startRecording() {
         let audioSession = AVAudioSession.sharedInstance()
 
@@ -149,10 +185,11 @@ struct RecorderWidgetView: View {
             try audioSession.setCategory(.playAndRecord, mode: .default, options: .defaultToSpeaker)
             try audioSession.setActive(true)
 
-            // Prepare file URL for storing audio
-            let fileName = UUID().uuidString + ".m4a"
+            // Prepare file URL with seedWord and timestamp
+            let dateString = currentDateString()
+            let audioFileName = "\(seedWord)_recording_\(dateString).m4a"
             let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-            let fileURL = paths[0].appendingPathComponent(fileName)
+            let fileURL = paths[0].appendingPathComponent(audioFileName)
             audioFilename = fileURL
 
             // Setup audio recorder settings
@@ -180,6 +217,47 @@ struct RecorderWidgetView: View {
             print("Failed to start recording: \(error.localizedDescription)")
         }
     }
+
+//
+//    // Define the startRecording method
+//    private func startRecording() {
+//        let audioSession = AVAudioSession.sharedInstance()
+//
+//        do {
+//            try audioSession.setCategory(.playAndRecord, mode: .default, options: .defaultToSpeaker)
+//            try audioSession.setActive(true)
+//
+//            // Prepare file URL for storing audio
+//            let fileName = UUID().uuidString + ".m4a"
+//            let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+//            let fileURL = paths[0].appendingPathComponent(fileName)
+//            audioFilename = fileURL
+//
+//            // Setup audio recorder settings
+//            let settings = [
+//                AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+//                AVSampleRateKey: 12000,
+//                AVNumberOfChannelsKey: 1,
+//                AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
+//            ]
+//
+//            audioRecorder = try AVAudioRecorder(url: fileURL, settings: settings)
+//            audioRecorder?.prepareToRecord()
+//            audioRecorder?.record()
+//
+//            isRecording = true
+//            showReset = false
+//            recordingDuration = 0
+//
+//            // Start recording timer
+//            recordingTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
+//                recordingDuration += 1
+//            }
+//
+//        } catch {
+//            print("Failed to start recording: \(error.localizedDescription)")
+//        }
+//    }
 
     // Define the stopRecording method
     private func stopRecording() {

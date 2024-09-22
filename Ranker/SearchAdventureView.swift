@@ -1,9 +1,6 @@
 import Foundation
 import SwiftUI
 
-//TODO We need to expand this so that we can add words that do not currently exist in the word database.
-//We need an interface for this here.
-
 struct SearchAdventureView: View {
     @StateObject var viewModel = SearchAdventureViewModel()
     @State private var searchText = ""
@@ -13,7 +10,7 @@ struct SearchAdventureView: View {
             TextField("Search for a word", text: $searchText)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
-                .
+                
             List {
                 ForEach(viewModel.searchResults) { word in
 
@@ -36,3 +33,7 @@ struct SearchAdventureView: View {
         }
     }
 }
+
+//TODO We need to expand this so that we can add words that do not currently exist in the word database.
+//We need an interface for this here.
+

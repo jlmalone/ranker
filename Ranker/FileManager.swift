@@ -9,4 +9,4 @@
 // seedword, daterecorded, transcript string, transcript filename, recording filename,  exported (boolean)
 
 // if the value was exported we consider it safe for deletion, otherwise the files should not be deleted.
-// we maintain the entry in the database even after the fale was deleted. 
+// we maintain the entry in the database even after the fale was deleted.

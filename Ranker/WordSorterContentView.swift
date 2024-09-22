@@ -1,5 +1,9 @@
 import Foundation
 import SwiftUI
+//
+//class SearchAdventureView {
+//}
+
 
 struct WordSorterContentView: View {
     @StateObject var viewModel = WordSorterViewModel()
@@ -34,6 +38,9 @@ struct WordSorterContentView: View {
                             .imageScale(.large)
                             .padding()
                     }
+                        //TODO why isnt
+                        .background(NavigationLink(destination: SearchBuddy(), isActive: $showingSearchView) { EmptyView() })
+
 
                     Button(action: {
                         self.showingShareSheet = true
@@ -89,6 +96,11 @@ struct WordSorterContentView: View {
             .sheet(isPresented: $showingShareSheet) {
                 let dbPath = databaseManager.databasePath()
                 ShareSheet(items: [URL(fileURLWithPath: dbPath)])
+
+            }
+            .sheet(isPresented: $showingSearchView){
+                    //TODO why isnt this working?
+                SearchBuddy()
 
             }
         }

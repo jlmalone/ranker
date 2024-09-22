@@ -9,6 +9,11 @@
 			<key>orderHint</key>
 			<integer>0</integer>
 		</dict>
+		<key>RankerTests.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>4</integer>
+		</dict>
 		<key>SQLite (Playground) 1.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -30,10 +35,18 @@
 			<key>orderHint</key>
 			<integer>1</integer>
 		</dict>
-		<key>Ranker.xcscheme</key>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>44ACF5FF2BBB38F50076C786</key>
 		<dict>
-			<key>orderHint</key>
-			<integer>4</integer>
+			<key>primary</key>
+			<true />
+		</dict>
+		<key>44ACF6112BBB38F60076C786</key>
+		<dict>
+			<key>primary</key>
+			<true />
 		</dict>
 	</dict>
 </dict>

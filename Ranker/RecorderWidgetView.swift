@@ -2,8 +2,8 @@ import Foundation
 
 import SwiftUI
 
-//TODO
-//
+
+// Specs. I believe the below is complete, it should be, but double check and maybe make me test cases
 
 //after the recording, a transcript needs to be generated.
 //both should be saved.
@@ -21,13 +21,21 @@ import SwiftUI
 //I articulated myself differently previously for a similar intention
 
 
-            //TODO I want a recorder widget here. It should have a record button, when i hit the record button i should see some
+            // I want a recorder widget here. It should have a record button, when i hit the record button i should see some
             //animated feedback that the widget is recording along with a time indicator for the length of time recorded so far. A stop button should be visible when and only when it is recording.
             //after i hit the stop button I should see a spinner or pending indicator while a transcript is being processed from the recording.
             //that transcript should be generated.
             //That transcript when ready should become visible in a scrollable textview with only 6 lines of small space separated text all lowercase.
             //A reset button should now be visible because a recording has occurred. If i click reset i get
             //a confirmation dialog that throws away the recording and the transcript.
+
+//Update. I added new code from Chat GPT below that I believe accomplishes the task above. I still need to test.
+
+// TODO make some test cases.
+// I can see files being saved locally on the device when I open up the simulator files
+// Another TODO is I do need to add permission checks and handling for denial etc. eg Open settings and return to previous screen possibly
+
+// TODO Need to actualually test that the manually input words are being properly saved to the database. 
 
 
 
@@ -176,7 +184,6 @@ struct RecorderWidgetView: View {
         UIApplication.shared.windows.first?.rootViewController?.present(alert, animated: true, completion: nil)
     }
 
-
     // Start recording with custom file names
     private func startRecording() {
         let audioSession = AVAudioSession.sharedInstance()
@@ -278,13 +285,13 @@ struct RecorderWidgetView: View {
         }
     }
 
-    // Define the resetRecording method
-    private func resetRecording() {
-        recordingDuration = 0
-        transcript = nil
-        showReset = false
-        audioFilename = nil
-    }
+//    // Define the resetRecording method
+//    private func resetRecording() {
+//        recordingDuration = 0
+//        transcript = nil
+//        showReset = false
+//        audioFilename = nil
+//    }
 
     // Define method to play the recorded audio
     private func playRecording() {

@@ -1,8 +1,7 @@
 import Foundation
 import SwiftUI
 
-
-class SearchAdventureViewModel: ObservableObject {
+class SearchBuddyViewModel :ObservableObject{
     @Published var searchResults: [Word] = []
 
     private let databaseManager = DatabaseManager()

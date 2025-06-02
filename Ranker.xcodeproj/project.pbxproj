@@ -22,6 +22,7 @@
 		44ACF6172BBB38F60076C786 /* RankerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44ACF6162BBB38F60076C786 /* RankerTests.swift */; };
 		44ACF6212BBB38F60076C786 /* RankerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44ACF6202BBB38F60076C786 /* RankerUITests.swift */; };
 		44ACF6232BBB38F60076C786 /* RankerUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44ACF6222BBB38F60076C786 /* RankerUITestsLaunchTests.swift */; };
+		83515E052DE66A8E0096995E /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 83515E042DE66A830096995E /* README.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -59,6 +60,7 @@
 		44ACF61C2BBB38F60076C786 /* RankerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RankerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		44ACF6202BBB38F60076C786 /* RankerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RankerUITests.swift; sourceTree = "<group>"; };
 		44ACF6222BBB38F60076C786 /* RankerUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RankerUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		83515E042DE66A830096995E /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,6 +112,7 @@
 		44ACF6022BBB38F50076C786 /* Ranker */ = {
 			isa = PBXGroup;
 			children = (
+				83515E042DE66A830096995E /* README.md */,
 				44ACF6032BBB38F50076C786 /* RankerApp.swift */,
 				44ACF6092BBB38F60076C786 /* Assets.xcassets */,
 				44ACF60B2BBB38F60076C786 /* Preview Content */,
@@ -260,6 +263,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				83515E052DE66A8E0096995E /* README.md in Resources */,
 				44ACF60D2BBB38F60076C786 /* Preview Assets.xcassets in Resources */,
 				44ACF60A2BBB38F60076C786 /* Assets.xcassets in Resources */,
 			);

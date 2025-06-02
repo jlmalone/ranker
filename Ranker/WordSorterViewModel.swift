@@ -1,3 +1,7 @@
+//  ranker/Ranker/WordSortedViewModel.swift
+
+//WordSorterViewModel: Manages the words array for the main UI, loads new batches, and saves rankings.
+
 
 import Foundation
 import Combine

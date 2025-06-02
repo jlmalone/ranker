@@ -3,6 +3,8 @@
 //  Ranker
 //
 //  Created by Joseph Malone on 4/11/24.
+
+// ProgressView/ProgressViewModel: Basic screen to show counts of reviewed/unreviewed words.
 //
 
 import Foundation

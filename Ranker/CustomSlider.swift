@@ -1,3 +1,6 @@
+
+// CustomSlider: A reusable UI component for the 0-1 ranking.
+
 import SwiftUI
 
 struct CustomSlider: View {

@@ -1,3 +1,17 @@
+
+// ranker/Ranker/DatabaseManager.swift
+
+
+//DatabaseManager:
+//  Uses SQLite.swift to manage a single table named words.
+//  Columns: id (PK, Int64 by default for Expression<Int64>), word (String, unique), rank (Double), notable (Bool), reviewed (Bool).
+//  populateInitialData: Fills the DB with all 3-letter combos and numbers 1-9999.
+//  fetchUnreviewedWords: Retrieves a batch of unreviewed words randomly.
+//  updateWord: Saves changes to rank, notable, and crucially, sets reviewed = true if rank is not 0.5.
+//  countReviewedWords/countUnreviewedWords: For progress tracking.
+//  databasePath(): Provides path to db.sqlite3 for sharing.
+
+
 import Foundation
 import SQLite
 
@@ -5,11 +19,14 @@ class DatabaseManager {
     private var db: Connection?
 
     let wordsTable = Table("words")
-    let id = Expression<Int64>("id")
-    let word = Expression<String>("word")
-    let rank = Expression<Double>("rank")
-    let notable = Expression<Bool>("notable")
-    let reviewed = Expression<Bool>("reviewed")
+
+
+
+    let id = SQLite.Expression<Int64>("id")
+    let word = SQLite.Expression<String>("word")
+    let rank = SQLite.Expression<Double>("rank")
+    let notable = SQLite.Expression<Bool>("notable")
+    let reviewed = SQLite.Expression<Bool>("reviewed")
 
     init() {
         setupDatabase()

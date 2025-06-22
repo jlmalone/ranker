@@ -2,18 +2,28 @@ import Foundation
 import SQLite
 
 class DatabaseManager {
+    //for full words
     private var db: Connection?
 
+//    private var db: Connection? // For fullwords
+    private var associationsDb: Connection? // For associations and recordings
+
     let wordsTable = Table("fullwords")
-    let id = Expression<Int64>("id")
-    let word = Expression<String>("word")
-    let rank = Expression<Double>("rank")
-    let notable = Expression<Bool>("notable")
-    let reviewed = Expression<Bool>("reviewed")
+    let id = SQLite.Expression<Int64>("id")
+    let word = SQLite.Expression<String>("word")
+    let rank = SQLite.Expression<Double>("rank")
+    let notable = SQLite.Expression<Bool>("notable")
+    let reviewed = SQLite.Expression<Bool>("reviewed")
 
     init() {
         setupDatabase()
+        setupAssociationsDatabase() // For associations and recordings
+
         createWordsTable()
+        // These will now use 'associationsDb'
+        createAssociationsTable()
+        createRecordingsTable()
+
         populateInitialDataIfNeeded()
     }
 
@@ -23,6 +33,91 @@ class DatabaseManager {
 //        let documentsDirectory = paths[0]
 //        return documentsDirectory.appendingPathComponent("db.sqlite3").path
 //    }
+
+
+    private func setupAssociationsDatabase() {
+        do {
+            let path = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first!
+            // Use a different filename for the associations database
+            associationsDb = try Connection("\(path)/associations_db.sqlite3")
+            print("Associations database setup at: \(path)/associations_db.sqlite3")
+        } catch {
+            print("Unable to set up associations database: \(error)")
+            associationsDb = nil // Ensure it's nil if setup fails
+        }
+    }
+
+
+    private func createAssociationsTable() {
+        guard let assocDB = self.associationsDb else {
+            print("Associations database connection is nil. Cannot create associations table.")
+            return
+        }
+        let createTable = associationsTable.create(ifNotExists: true) { table in
+            table.column(assoc_id, primaryKey: .autoincrement)
+            table.column(assoc_main_word_id) // Stores the ID from the *other* database's fullwords table
+            table.column(assoc_text)
+            table.column(assoc_is_starred)
+            table.column(assoc_created_at)
+        }
+        do {
+            try assocDB.run(createTable)
+            print("Created associations table or already exists IN associations_db.")
+        } catch {
+            print("Failed to create associations table: \(error)")
+        }
+    }
+
+    private func createRecordingsTable() {
+        guard let assocDB = self.associationsDb else {
+            print("Associations database connection is nil. Cannot create recordings table.")
+            return
+        }
+        let createTable = recordingsTable.create(ifNotExists: true) { table in
+            table.column(rec_id, primaryKey: .autoincrement)
+            table.column(rec_main_word_id) // Stores the ID from the *other* database's fullwords table
+            table.column(rec_audio_filename)
+            table.column(rec_transcript_text)
+            table.column(rec_is_starred)
+            table.column(rec_created_at)
+        }
+        do {
+            try assocDB.run(createTable)
+            print("Created recordings table or already exists IN associations_db.")
+        } catch {
+            print("Failed to create recordings table: \(error)")
+        }
+    }
+
+
+    func addWordAssociation(mainWordId: Int64, text: String, isStarred: Bool) throws {
+        guard let assocDB = self.associationsDb else {
+            throw NSError(domain: "DatabaseManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "Associations database not initialized"])
+        }
+        let insert = associationsTable.insert(
+            assoc_main_word_id <- mainWordId,
+            assoc_text <- text,
+            assoc_is_starred <- isStarred,
+            assoc_created_at <- Date()
+        )
+        try assocDB.run(insert)
+        print("Added word association for mainWordId: \(mainWordId)")
+    }
+
+    func saveAudioRecording(mainWordId: Int64, audioFilename: String, transcript: String?, isStarred: Bool) throws {
+        guard let assocDB = self.associationsDb else {
+            throw NSError(domain: "DatabaseManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "Associations database not initialized"])
+        }
+        let insert = recordingsTable.insert(
+            rec_main_word_id <- mainWordId,
+            rec_audio_filename <- audioFilename,
+            rec_transcript_text <- transcript,
+            rec_is_starred <- isStarred,
+            rec_created_at <- Date()
+        )
+        try assocDB.run(insert)
+        print("Saved audio recording for mainWordId: \(mainWordId)")
+    }
 
 
     // Centralized function for the database path
@@ -188,6 +283,25 @@ class DatabaseManager {
             print("Failed to populate dummy data: \(error)")
         }
     }
+
+
+
+    // For word_associations table (in associations_db.sqlite3)
+    let associationsTable = Table("word_associations")
+    let assoc_id = SQLite.Expression<Int64>("id")
+    let assoc_main_word_id = SQLite.Expression<Int64>("main_word_id") // This ID refers to a word in the *other* database (fullwords.id)
+    let assoc_text = SQLite.Expression<String>("associated_text")
+    let assoc_is_starred = SQLite.Expression<Bool>("is_starred")
+    let assoc_created_at = SQLite.Expression<Date>("created_at")
+
+    // For audio_recordings table (in associations_db.sqlite3)
+    let recordingsTable = Table("audio_recordings")
+    let rec_id = SQLite.Expression<Int64>("id")
+    let rec_main_word_id = SQLite.Expression<Int64>("main_word_id") // Also refers to fullwords.id
+    let rec_audio_filename = SQLite.Expression<String>("audio_filename")
+    let rec_transcript_text = SQLite.Expression<String?>("transcript_text")
+    let rec_is_starred = SQLite.Expression<Bool>("is_starred")
+    let rec_created_at = SQLite.Expression<Date>("created_at")
 
 
 

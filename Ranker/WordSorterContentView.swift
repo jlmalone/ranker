@@ -39,7 +39,7 @@ struct WordSorterContentView: View {
                             .padding()
                     }
                         //TODO why isnt
-                        .background(NavigationLink(destination: SearchBuddy(), isActive: $showingSearchView) { EmptyView() })
+                        .background(NavigationLink(destination: SearchView(), isActive: $showingSearchView) { EmptyView() })
 
 
                     Button(action: {
@@ -100,7 +100,7 @@ struct WordSorterContentView: View {
             }
             .sheet(isPresented: $showingSearchView){
                     //TODO why isnt this working?
-                SearchBuddy()
+                SearchView()
 
             }
         }

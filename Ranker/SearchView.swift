@@ -1,8 +1,8 @@
 import Foundation
 import SwiftUI
 
-struct SearchAdventureView: View {
-    @StateObject var viewModel = SearchAdventureViewModel()
+struct SearchView: View {
+    @StateObject var viewModel = SearchViewModel()
     @State private var searchText = ""
 
     var body: some View {

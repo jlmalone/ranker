@@ -1,0 +1,33 @@
+{
+  "configurations" : [
+    {
+      "id" : "E69236BF-6609-4152-B64F-31DE5EC72BDD",
+      "name" : "Configuration 1",
+      "options" : {
+        "environmentVariables": {
+          "SIMULATOR_ONLY": "true"
+        }
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:Ranker.xcodeproj",
+        "identifier" : "44ACF6112BBB38F60076C786",
+        "name" : "RankerTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:Ranker.xcodeproj",
+        "identifier" : "44ACF61B2BBB38F60076C786",
+        "name" : "RankerUITests"
+      }
+    }
+  ],
+  "version" : 1
+}

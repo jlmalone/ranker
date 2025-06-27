@@ -5,6 +5,11 @@ import XCTest
 final class RankerTests: XCTestCase {
 
     override func setUpWithError() throws {
+        if ProcessInfo.processInfo.environment["SIMULATOR_ONLY"] != nil {
+            // Proceed with test setup
+        } else {
+            fatalError("Tests should only be run on the simulator.")
+        }
         // Put setup code here. This method is called before the invocation of each test method in the class.
     }
 

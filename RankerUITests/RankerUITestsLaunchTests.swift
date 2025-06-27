@@ -14,6 +14,11 @@ final class RankerUITestsLaunchTests: XCTestCase {
     }
 
     override func setUpWithError() throws {
+        if ProcessInfo.processInfo.environment["SIMULATOR_ONLY"] != nil {
+            // Proceed with test setup
+        } else {
+            fatalError("Tests should only be run on the simulator.")
+        }
         continueAfterFailure = false
     }
 

@@ -1,0 +1,16 @@
+I want you to write unit tests and some integration tests that run on the simulator
+Especially testing the database.
+
+
+Please also write me readme description documentation for each section of the app. The major use cases and functions
+The major User journeys
+
+Write me high level deocumentation for each major feature of the app that let's say future developers
+and LLMs and AI agents can absorb for context and then to better understand to continue developing and building
+
+Based on the journeys and the different features, write me more unit tests and more integration tests for a simulator
+
+Because I do not want to risk data on the physical device to be corrupted or wiped out, I want a flag there
+So that testing can only be performed on the simulator
+
+

@@ -19,17 +19,9 @@ class DatabaseManager {
     //for full words
     private var db: Connection?
 
-<<<<<<< HEAD
-    let wordsTable = Table("words")
-
-
-
-=======
-//    private var db: Connection? // For fullwords
     private var associationsDb: Connection? // For associations and recordings
 
     let wordsTable = Table("fullwords")
->>>>>>> feature/enhance-docs
     let id = SQLite.Expression<Int64>("id")
     let word = SQLite.Expression<String>("word")
     let rank = SQLite.Expression<Double>("rank")

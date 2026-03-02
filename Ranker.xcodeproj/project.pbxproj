@@ -27,16 +27,13 @@
 		44ACF6172BBB38F60076C786 /* RankerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44ACF6162BBB38F60076C786 /* RankerTests.swift */; };
 		44ACF6212BBB38F60076C786 /* RankerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44ACF6202BBB38F60076C786 /* RankerUITests.swift */; };
 		44ACF6232BBB38F60076C786 /* RankerUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44ACF6222BBB38F60076C786 /* RankerUITestsLaunchTests.swift */; };
-<<<<<<< HEAD
 		83515E052DE66A8E0096995E /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 83515E042DE66A830096995E /* README.md */; };
-=======
 		AA4B32174C1A1C90FEBE23BA /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4B3CA3D15B518592E51823 /* SettingsView.swift */; };
 		AE50A0F08E51E1B89D164364 /* Test Instructions.txt in Resources */ = {isa = PBXBuildFile; fileRef = AE50AB5808E59A60E940596C /* Test Instructions.txt */; };
 		AE50A10E9EDBA7C284FACBFA /* AssociatedIdeasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE50A42F012A90B6109C8E88 /* AssociatedIdeasView.swift */; };
 		AE50AD305EC64BFFA048E2E4 /* DatabaseManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE50AF304D5E7C3AEC9E779A /* DatabaseManagerTests.swift */; };
 		AE50AE3D7DD55737BAE95B87 /* AssociatedIdeasViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE50A8E386106B950CDBD236 /* AssociatedIdeasViewTests.swift */; };
 		AE50AE6CF9F886A968A8D9A9 /* WordSorterViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE50AE0F6A13B6F8BA78F82C /* WordSorterViewModelTests.swift */; };
->>>>>>> feature/enhance-docs
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -80,16 +77,13 @@
 		44ACF61C2BBB38F60076C786 /* RankerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RankerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		44ACF6202BBB38F60076C786 /* RankerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RankerUITests.swift; sourceTree = "<group>"; };
 		44ACF6222BBB38F60076C786 /* RankerUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RankerUITestsLaunchTests.swift; sourceTree = "<group>"; };
-<<<<<<< HEAD
 		83515E042DE66A830096995E /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-=======
 		AA4B3CA3D15B518592E51823 /* SettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		AE50A42F012A90B6109C8E88 /* AssociatedIdeasView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AssociatedIdeasView.swift; sourceTree = "<group>"; };
 		AE50A8E386106B950CDBD236 /* AssociatedIdeasViewTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AssociatedIdeasViewTests.swift; sourceTree = "<group>"; };
 		AE50AB5808E59A60E940596C /* Test Instructions.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "Test Instructions.txt"; sourceTree = "<group>"; };
 		AE50AE0F6A13B6F8BA78F82C /* WordSorterViewModelTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WordSorterViewModelTests.swift; sourceTree = "<group>"; };
 		AE50AF304D5E7C3AEC9E779A /* DatabaseManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DatabaseManagerTests.swift; sourceTree = "<group>"; };
->>>>>>> feature/enhance-docs
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -150,15 +144,12 @@
 		44ACF6022BBB38F50076C786 /* Ranker */ = {
 			isa = PBXGroup;
 			children = (
-<<<<<<< HEAD
 				83515E042DE66A830096995E /* README.md */,
-=======
 				4420CD162C9CE9FB00146CEB /* ExportSheet.swift */,
 				4420CD152C9CE9FB00146CEB /* FileManager.swift */,
 				4420CD132C9CE9FB00146CEB /* SearchView.swift */,
 				4420CD142C9CE9FB00146CEB /* SearchViewModel.swift */,
 				4410864E2C8D0FC7009890B1 /* RecorderWidgetView.swift */,
->>>>>>> feature/enhance-docs
 				44ACF6032BBB38F50076C786 /* RankerApp.swift */,
 				44ACF6092BBB38F60076C786 /* Assets.xcassets */,
 				44ACF60B2BBB38F60076C786 /* Preview Content */,

@@ -1,10 +1,5 @@
-<<<<<<< HEAD
+// WordSorterContentView: The main UI. Displays words in a LazyVGrid with sliders and star buttons.
 
-
-// WordSorterContentView: The main UI. Displays words in a LazyVGrid with sliders and star buttons. Has "Next" to save/load, and buttons to navigate to ProgressView and ShareSheet.
-
-=======
->>>>>>> feature/enhance-docs
 import Foundation
 import SwiftUI
 //

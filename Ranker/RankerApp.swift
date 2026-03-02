@@ -5,34 +5,51 @@ struct RankerApp: App {
 
     var body: some Scene {
         WindowGroup {
-            NavigationView {
-                TabView {
-                    MemoryDumpView()
-                        .tabItem {
-                            Image(systemName: "brain.head.profile")
-                            Text("Dump")
-                        }
+            TabView {
+                MemoryDumpView()
+                    .tabItem {
+                        Image(systemName: "brain.head.profile")
+                        Text("Dump")
+                    }
 
-                    WordSorterContentView()
-                        .tabItem {
-                            Image(systemName: "list.dash")
-                            Text("Ranker")
-                        }
+                RankingContainerView()
+                    .tabItem {
+                        Image(systemName: "arrow.left.arrow.right")
+                        Text("Ranker")
+                    }
 
-                    SearchView()
-                        .tabItem {
-                            Image(systemName: "magnifyingglass")
-                            Text("Search")
-                        }
+                PatternRankingView()
+                    .tabItem {
+                        Image(systemName: "textformat.abc")
+                        Text("Patterns")
+                    }
 
-                    SettingsView()
-                        .tabItem {
-                            Image(systemName: "gear")
-                            Text("Settings")
-                        }
-                }
+                SearchView()
+                    .tabItem {
+                        Image(systemName: "magnifyingglass")
+                        Text("Search")
+                    }
+
+                SettingsView()
+                    .tabItem {
+                        Image(systemName: "gear")
+                        Text("Settings")
+                    }
             }
-            .navigationViewStyle(StackNavigationViewStyle())
+        }
+    }
+}
+
+struct RankingContainerView: View {
+    @State private var showRanking = false
+
+    var body: some View {
+        NavigationStack {
+            if showRanking {
+                EloRankingView()
+            } else {
+                ContextPrimingView(showRanking: $showRanking)
+            }
         }
     }
 }

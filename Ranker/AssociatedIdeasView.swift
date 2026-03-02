@@ -1,79 +1,119 @@
-import Foundation
 import SwiftUI
 
-
-// TODO this is now crashing sort it out
-//Failed to request default share mode for fileURL:file:///Users/joseph.malone/Library/Developer/CoreSimulator/Devices/4DE38375-3220-4ED5-A84D-35205FAD1371/data/Containers/Data/Application/6FAD5243-30E4-42E4-8AF0-1E5D05494FFF/Documents/db_full_words.sqlite3 error:Error Domain=NSOSStatusErrorDomain Code=-10814 "(null)" UserInfo={_LSLine=1608, _LSFunction=runEvaluator}
-//Only support loading options for CKShare and SWY types. *** I dont know wht this is or where I come up with that. Help educate me***
-//error fetching item for URL:file:///Users/joseph.malone/Library/Developer/CoreSimulator/Devices/4DE38375-3220-4ED5-A84D-35205FAD1371/data/Containers/Data/Application/6FAD5243-30E4-42E4-8AF0-1E5D05494FFF/Documents/db_full_words.sqlite3 : Error Domain=NSCocoaErrorDomain Code=256 "The file couldn’t be opened."
-//Collaboration: error loading metadata for documentURL:file:///Users/joseph.malone/Library/Developer/CoreSimulator/Devices/4DE38375-3220-4ED5-A84D-35205FAD1371/data/Containers/Data/Application/6FAD5243-30E4-42E4-8AF0-1E5D05494FFF/Documents/db_full_words.sqlite3 error:Error Domain=NSFileProviderInternalErrorDomain Code=0 "No valid file provider found from URL file:///Users/joseph.malone/Library/Developer/CoreSimulator/Devices/4DE38375-3220-4ED5-A84D-35205FAD1371/data/Containers/Data/Application/6FAD5243-30E4-42E4-8AF0-1E5D05494FFF/Documents/db_full_words.sqlite3." UserInfo={NSLocalizedDescription=No valid file provider found from URL file:///Users/joseph.malone/Library/Developer/CoreSimulator/Devices/4DE38375-3220-4ED5-A84D-35205FAD1371/data/Containers/Data/Application/6FAD5243-30E4-42E4-8AF0-1E5D05494FFF/Documents/db_full_words.sqlite3.}
-//Error acquiring assertion: <Error Domain=RBSServiceErrorDomain Code=1 "(originator doesn't have entitlement com.apple.runningboard.primitiveattribute AND originator doesn't have entitlement com.apple.runningboard.assertions.frontboard AND target is not running or doesn't have entitlement com.apple.runningboard.trustedtarget AND Target not hosted by originator)" UserInfo={NSLocalizedFailureReason=(originator doesn't have entitlement com.apple.runningboard.primitiveattribute AND originator doesn't have entitlement com.apple.runningboard.assertions.frontboard AND target is not running or doesn't have entitlement com.apple.runningboard.trustedtarget AND Target not hosted by originator)}>
-//connection invalidated
-//Created table or already exists.
-//Column name: 3, Type: notable, Not null: INTEGER, Default Value: 1, Primary Key: 0
-//Column name: 4, Type: reviewed, Not null: INTEGER, Default Value: 1, Primary Key: 0
-//Created table or already exists.
-//Column name: 3, Type: notable, Not null: INTEGER, Default Value: 1, Primary Key: 0
-//Column name: 4, Type: reviewed, Not null: INTEGER, Default Value: 1, Primary Key: 0
-//This app has crashed because it attempted to access privacy-sensitive data without a usage description.  The app's Info.plist must contain an NSMicrophoneUsageDescription key with a string value explaining to the user how the app uses this data.
-
-
-//The above notes might have already been solved and can possibly be cleaned up
-//TODO I guess this is the actual displayed wrapper of the Recorder widget and Associated text.
-//Need to test and check that the associated ideas are getting saved. This may relieve responsibility from other files
-    //like notes i put in the records.
-
-
 struct AssociatedIdeasView: View {
-    let word: String  // The word passed from the previous screen
+    let word: String
 
-    @State private var associatedWord: String = ""  // State to hold the input
+    @StateObject private var viewModel: AssociationChainViewModel
 
+    init(word: String) {
+        self.word = word
+        _viewModel = StateObject(wrappedValue: AssociationChainViewModel(startWord: word))
+    }
 
     var body: some View {
-        VStack {
-            // Title at the top displaying the word
-            Text("\(word)")
-                .font(.largeTitle)
+        VStack(spacing: 0) {
+            // Chain display
+            ScrollView {
+                VStack(spacing: 0) {
+                    ForEach(Array(viewModel.chain.enumerated()), id: \.offset) { index, link in
+                        chainNode(link.word, isStart: index == 0)
+                        if index < viewModel.chain.count - 1 {
+                            chainArrow(label: link.label)
+                        }
+                    }
+
+                    // Current end of chain — add link
+                    if !viewModel.chain.isEmpty {
+                        chainArrow(label: "reminds me of")
+                    }
+                }
                 .padding()
+            }
 
-            Spacer()  // Pushes content to the top and bottom
+            Divider()
 
+            // Add link input
+            HStack {
+                TextField("What does this remind you of?", text: $viewModel.newWord)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
 
-            TextField("Enter associated word", text: $associatedWord)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
+                Button("Add") {
+                    viewModel.addLink()
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(viewModel.newWord.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            }
+            .padding()
 
-            Spacer()  // Pushes content to the top and bottom
-
-
-            Text("\(word)")
-                .padding()
-
+            // Recorder section
             RecorderWidgetView(seedWord: word)
+                .padding(.horizontal)
 
             Spacer()
-
-            // "Done" button at the bottom
-            Button(action: {
-                // TODO: Save the data to the database
-                // For now It just shows a confirmation dialog listing:
-                //the filename for the recording if it exists
-                //the filename for the transcript in it exists
-                //the truncated version of the Textfield text that the user input
-
-                print("Save associated ideas for \(word)")  // Debug print
-            }) {
-                Text("Done")
-                    .font(.title)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-            }
-            .padding(.bottom, 20)  // Space from the bottom of the screen
         }
-        .navigationBarTitleDisplayMode(.inline)  // Shows title inline in the navigation bar
+        .navigationTitle(word)
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func chainNode(_ text: String, isStart: Bool) -> some View {
+        Text(text)
+            .font(isStart ? .title2 : .body)
+            .fontWeight(isStart ? .bold : .regular)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .frame(maxWidth: .infinity)
+            .background(isStart ? Color.blue.opacity(0.15) : Color.gray.opacity(0.1))
+            .cornerRadius(8)
+    }
+
+    private func chainArrow(label: String) -> some View {
+        VStack(spacing: 2) {
+            Image(systemName: "arrow.down")
+                .font(.caption)
+                .foregroundColor(.secondary)
+            Text(label)
+                .font(.caption2)
+                .foregroundColor(.secondary)
+        }
+        .padding(.vertical, 4)
     }
 }
 
+class AssociationChainViewModel: ObservableObject {
+    struct ChainLink {
+        let word: String
+        let label: String
+    }
+
+    @Published var chain: [ChainLink] = []
+    @Published var newWord = ""
+
+    private let databaseManager = DatabaseManager()
+    private let chainUUID: String
+    private let startWord: String
+
+    init(startWord: String) {
+        self.startWord = startWord
+        self.chainUUID = UUID().uuidString
+        self.chain = [ChainLink(word: startWord, label: "")]
+    }
+
+    func addLink() {
+        let cleaned = newWord.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleaned.isEmpty else { return }
+
+        let fromWord = chain.last?.word ?? startWord
+        let position = chain.count
+
+        databaseManager.addChainLink(
+            fromWord: fromWord,
+            toWord: cleaned,
+            label: "reminds me of",
+            chainUUID: chainUUID,
+            position: position
+        )
+
+        chain.append(ChainLink(word: cleaned.lowercased(), label: "reminds me of"))
+        newWord = ""
+    }
+}

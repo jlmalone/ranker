@@ -1,47 +1,64 @@
-
-//
-//  SettingsView.swift
-//  Ranker
-//
-//  Created by Agent Malone on 9/4/24.
-//
-
-import Foundation
-
-
 import SwiftUI
 
 struct SettingsView: View {
     @StateObject var viewModel = SettingsViewModel()
+    @State private var showExport = false
 
     var body: some View {
-        VStack {
-            Text("Manage Files")
-                .font(.headline)
+        NavigationStack {
+            List {
+                Section("Database") {
+                    HStack {
+                        Text("Total words")
+                        Spacer()
+                        Text("\(viewModel.totalWords)")
+                            .foregroundColor(.secondary)
+                    }
+                    HStack {
+                        Text("Reviewed")
+                        Spacer()
+                        Text("\(viewModel.reviewedCount)")
+                            .foregroundColor(.secondary)
+                    }
+                    HStack {
+                        Text("Elo comparisons")
+                        Spacer()
+                        Text("\(viewModel.comparisonCount)")
+                            .foregroundColor(.secondary)
+                    }
+                }
 
-            Text("Total Data Size: \(viewModel.totalDataSize, specifier: "%.2f") MB")
+                Section("Export") {
+                    Button("Export ranker_export.json") {
+                        showExport = true
+                    }
+                }
 
-            Button("Export to Google Drive") {
-                viewModel.exportToGoogleDrive()
+                Section("Data") {
+                    NavigationLink("Legacy Word Ranker") {
+                        WordSorterContentView()
+                    }
+                }
             }
-
-            Button("Delete All Files") {
-                viewModel.deleteAllFiles()
+            .navigationTitle("Settings")
+            .onAppear { viewModel.refresh() }
+            .sheet(isPresented: $showExport) {
+                ExportView()
             }
-            .foregroundColor(.red)
         }
-        .padding()
     }
 }
 
 class SettingsViewModel: ObservableObject {
-    @Published var totalDataSize: Double = 0.0
+    @Published var totalWords = 0
+    @Published var reviewedCount = 0
+    @Published var comparisonCount = 0
 
-    func exportToGoogleDrive() {
-        // Implement export logic
-    }
+    private let databaseManager = DatabaseManager()
 
-    func deleteAllFiles() {
-        // Implement deletion logic
+    func refresh() {
+        totalWords = databaseManager.countTotalWords()
+        reviewedCount = databaseManager.countReviewedWords()
+        comparisonCount = databaseManager.countEloComparisons()
     }
 }

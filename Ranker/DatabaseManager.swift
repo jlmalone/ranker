@@ -1,94 +1,234 @@
 
 // ranker/Ranker/DatabaseManager.swift
 
-
-//DatabaseManager:
-//  Uses SQLite.swift to manage a single table named words.
-//  Columns: id (PK, Int64 by default for Expression<Int64>), word (String, unique), rank (Double), notable (Bool), reviewed (Bool).
-//  populateInitialData: Fills the DB with all 3-letter combos and numbers 1-9999.
-//  fetchUnreviewedWords: Retrieves a batch of unreviewed words randomly.
-//  updateWord: Saves changes to rank, notable, and crucially, sets reviewed = true if rank is not 0.5.
-//  countReviewedWords/countUnreviewedWords: For progress tracking.
-//  databasePath(): Provides path to db.sqlite3 for sharing.
-
-
 import Foundation
 import SQLite
 
 class DatabaseManager {
-    //for full words
     private var db: Connection?
+    private var associationsDb: Connection?
 
-    private var associationsDb: Connection? // For associations and recordings
-
+    // MARK: - fullwords table
     let wordsTable = Table("fullwords")
     let id = SQLite.Expression<Int64>("id")
     let word = SQLite.Expression<String>("word")
     let rank = SQLite.Expression<Double>("rank")
     let notable = SQLite.Expression<Bool>("notable")
     let reviewed = SQLite.Expression<Bool>("reviewed")
+    let eloScore = SQLite.Expression<Double>("elo_score")
+    let source = SQLite.Expression<String?>("source")
+
+    // MARK: - memory_dumps table
+    let memoryDumpsTable = Table("memory_dumps")
+    let dump_id = SQLite.Expression<Int64>("id")
+    let dump_prompt = SQLite.Expression<String>("prompt")
+    let dump_content = SQLite.Expression<String>("content")
+    let dump_created_at = SQLite.Expression<String>("created_at")
+
+    // MARK: - elo_comparisons table
+    let eloComparisonsTable = Table("elo_comparisons")
+    let elo_id = SQLite.Expression<Int64>("id")
+    let elo_word_a_id = SQLite.Expression<Int64>("word_a_id")
+    let elo_word_b_id = SQLite.Expression<Int64>("word_b_id")
+    let elo_winner_id = SQLite.Expression<Int64>("winner_id")
+    let elo_created_at = SQLite.Expression<String>("created_at")
+
+    // MARK: - pattern_rankings table
+    let patternRankingsTable = Table("pattern_rankings")
+    let pattern_id = SQLite.Expression<Int64>("id")
+    let pattern_name = SQLite.Expression<String>("pattern")
+    let pattern_example = SQLite.Expression<String>("example")
+    let pattern_confidence = SQLite.Expression<Double>("confidence")
+    let pattern_created_at = SQLite.Expression<String>("created_at")
+
+    // MARK: - association_chains table
+    let associationChainsTable = Table("association_chains")
+    let chain_id_pk = SQLite.Expression<Int64>("id")
+    let chain_from_word = SQLite.Expression<String>("from_word")
+    let chain_to_word = SQLite.Expression<String>("to_word")
+    let chain_label = SQLite.Expression<String>("label")
+    let chain_id = SQLite.Expression<String>("chain_id")
+    let chain_position = SQLite.Expression<Int64>("position")
+    let chain_created_at = SQLite.Expression<String>("created_at")
+
+    // MARK: - word_associations table (in associations_db)
+    let associationsTable = Table("word_associations")
+    let assoc_id = SQLite.Expression<Int64>("id")
+    let assoc_main_word_id = SQLite.Expression<Int64>("main_word_id")
+    let assoc_text = SQLite.Expression<String>("associated_text")
+    let assoc_is_starred = SQLite.Expression<Bool>("is_starred")
+    let assoc_created_at = SQLite.Expression<Date>("created_at")
+
+    // MARK: - audio_recordings table (in associations_db)
+    let recordingsTable = Table("audio_recordings")
+    let rec_id = SQLite.Expression<Int64>("id")
+    let rec_main_word_id = SQLite.Expression<Int64>("main_word_id")
+    let rec_audio_filename = SQLite.Expression<String>("audio_filename")
+    let rec_transcript_text = SQLite.Expression<String?>("transcript_text")
+    let rec_is_starred = SQLite.Expression<Bool>("is_starred")
+    let rec_created_at = SQLite.Expression<Date>("created_at")
 
     init() {
         setupDatabase()
-        setupAssociationsDatabase() // For associations and recordings
+        setupAssociationsDatabase()
 
         createWordsTable()
-        // These will now use 'associationsDb'
+        createMemoryDumpsTable()
+        createEloComparisonsTable()
+        createPatternRankingsTable()
+        createAssociationChainsTable()
+        migrateWordsTableColumns()
+
         createAssociationsTable()
         createRecordingsTable()
-
-        populateInitialDataIfNeeded()
     }
 
-//    // Centralized function for the database path
-//     func databasePath() -> String {
-//        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-//        let documentsDirectory = paths[0]
-//        return documentsDirectory.appendingPathComponent("db.sqlite3").path
-//    }
+    // MARK: - Database Setup
 
+    func databasePath() -> String {
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        let documentsDirectory = paths[0]
+        return documentsDirectory.appendingPathComponent("db_full_words.sqlite3").path
+    }
+
+    private func setupDatabase() {
+        do {
+            let path = databasePath()
+            db = try Connection(path)
+        } catch {
+            print("Unable to set up database: \(error)")
+        }
+    }
 
     private func setupAssociationsDatabase() {
         do {
             let path = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first!
-            // Use a different filename for the associations database
             associationsDb = try Connection("\(path)/associations_db.sqlite3")
-            print("Associations database setup at: \(path)/associations_db.sqlite3")
         } catch {
             print("Unable to set up associations database: \(error)")
-            associationsDb = nil // Ensure it's nil if setup fails
+            associationsDb = nil
         }
     }
 
+    // MARK: - Table Creation
+
+    private func createWordsTable() {
+        let createTable = wordsTable.create(ifNotExists: true) { table in
+            table.column(id, primaryKey: .autoincrement)
+            table.column(word, unique: true)
+            table.column(rank)
+            table.column(notable, defaultValue: false)
+            table.column(reviewed, defaultValue: false)
+        }
+        do {
+            try db?.run(createTable)
+        } catch {
+            print("Failed to create fullwords table: \(error)")
+        }
+    }
+
+    private func migrateWordsTableColumns() {
+        guard let db = db else { return }
+        // Add elo_score column if not present
+        do {
+            try db.run("ALTER TABLE fullwords ADD COLUMN elo_score REAL DEFAULT 1200.0")
+        } catch {
+            // Column already exists, ignore
+        }
+        // Add source column if not present
+        do {
+            try db.run("ALTER TABLE fullwords ADD COLUMN source TEXT")
+        } catch {
+            // Column already exists, ignore
+        }
+    }
+
+    private func createMemoryDumpsTable() {
+        guard let db = db else { return }
+        let createTable = memoryDumpsTable.create(ifNotExists: true) { table in
+            table.column(dump_id, primaryKey: .autoincrement)
+            table.column(dump_prompt)
+            table.column(dump_content)
+            table.column(dump_created_at)
+        }
+        do {
+            try db.run(createTable)
+        } catch {
+            print("Failed to create memory_dumps table: \(error)")
+        }
+    }
+
+    private func createEloComparisonsTable() {
+        guard let db = db else { return }
+        let createTable = eloComparisonsTable.create(ifNotExists: true) { table in
+            table.column(elo_id, primaryKey: .autoincrement)
+            table.column(elo_word_a_id)
+            table.column(elo_word_b_id)
+            table.column(elo_winner_id)
+            table.column(elo_created_at)
+        }
+        do {
+            try db.run(createTable)
+        } catch {
+            print("Failed to create elo_comparisons table: \(error)")
+        }
+    }
+
+    private func createPatternRankingsTable() {
+        guard let db = db else { return }
+        let createTable = patternRankingsTable.create(ifNotExists: true) { table in
+            table.column(pattern_id, primaryKey: .autoincrement)
+            table.column(pattern_name)
+            table.column(pattern_example)
+            table.column(pattern_confidence)
+            table.column(pattern_created_at)
+        }
+        do {
+            try db.run(createTable)
+        } catch {
+            print("Failed to create pattern_rankings table: \(error)")
+        }
+    }
+
+    private func createAssociationChainsTable() {
+        guard let db = db else { return }
+        let createTable = associationChainsTable.create(ifNotExists: true) { table in
+            table.column(chain_id_pk, primaryKey: .autoincrement)
+            table.column(chain_from_word)
+            table.column(chain_to_word)
+            table.column(chain_label, defaultValue: "reminds me of")
+            table.column(chain_id)
+            table.column(chain_position)
+            table.column(chain_created_at)
+        }
+        do {
+            try db.run(createTable)
+        } catch {
+            print("Failed to create association_chains table: \(error)")
+        }
+    }
 
     private func createAssociationsTable() {
-        guard let assocDB = self.associationsDb else {
-            print("Associations database connection is nil. Cannot create associations table.")
-            return
-        }
+        guard let assocDB = self.associationsDb else { return }
         let createTable = associationsTable.create(ifNotExists: true) { table in
             table.column(assoc_id, primaryKey: .autoincrement)
-            table.column(assoc_main_word_id) // Stores the ID from the *other* database's fullwords table
+            table.column(assoc_main_word_id)
             table.column(assoc_text)
             table.column(assoc_is_starred)
             table.column(assoc_created_at)
         }
         do {
             try assocDB.run(createTable)
-            print("Created associations table or already exists IN associations_db.")
         } catch {
             print("Failed to create associations table: \(error)")
         }
     }
 
     private func createRecordingsTable() {
-        guard let assocDB = self.associationsDb else {
-            print("Associations database connection is nil. Cannot create recordings table.")
-            return
-        }
+        guard let assocDB = self.associationsDb else { return }
         let createTable = recordingsTable.create(ifNotExists: true) { table in
             table.column(rec_id, primaryKey: .autoincrement)
-            table.column(rec_main_word_id) // Stores the ID from the *other* database's fullwords table
+            table.column(rec_main_word_id)
             table.column(rec_audio_filename)
             table.column(rec_transcript_text)
             table.column(rec_is_starred)
@@ -96,12 +236,289 @@ class DatabaseManager {
         }
         do {
             try assocDB.run(createTable)
-            print("Created recordings table or already exists IN associations_db.")
         } catch {
             print("Failed to create recordings table: \(error)")
         }
     }
 
+    // MARK: - Memory Dumps (Mode 1)
+
+    func saveMemoryDump(prompt: String, content: String) {
+        guard let db = db else { return }
+        let now = ISO8601DateFormatter().string(from: Date())
+        let insert = memoryDumpsTable.insert(
+            dump_prompt <- prompt,
+            dump_content <- content,
+            dump_created_at <- now
+        )
+        do {
+            try db.run(insert)
+        } catch {
+            print("Failed to save memory dump: \(error)")
+        }
+    }
+
+    func insertWordFromDump(_ wordText: String, wordSource: String = "free_association") {
+        guard let db = db else { return }
+        let cleaned = wordText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !cleaned.isEmpty else { return }
+        do {
+            try db.run(wordsTable.insert(or: .ignore,
+                word <- cleaned,
+                rank <- 0.5,
+                notable <- false,
+                reviewed <- false,
+                eloScore <- 1200.0,
+                source <- wordSource
+            ))
+        } catch {
+            print("Failed to insert word '\(cleaned)': \(error)")
+        }
+    }
+
+    // MARK: - Elo Comparisons (Mode 2)
+
+    func fetchPairForComparison() -> (Word, Word)? {
+        guard let db = db else { return nil }
+        do {
+            // Get words with fewest comparisons, prefer similar Elo scores
+            let allWords = try db.prepare(wordsTable.order(SQLite.Expression<Int64>.random()).limit(50))
+            var words: [Word] = []
+            for row in allWords {
+                words.append(Word(
+                    id: row[id],
+                    name: row[word],
+                    rank: row[rank],
+                    isNotable: row[notable],
+                    eloScore: row[eloScore]
+                ))
+            }
+            guard words.count >= 2 else { return nil }
+
+            // Count comparisons per word
+            var comparisonCounts: [Int64: Int] = [:]
+            for w in words {
+                let count = try db.scalar(
+                    eloComparisonsTable.filter(elo_word_a_id == w.id || elo_word_b_id == w.id).count
+                )
+                comparisonCounts[w.id] = count
+            }
+
+            // Sort by fewest comparisons
+            words.sort { (comparisonCounts[$0.id] ?? 0) < (comparisonCounts[$1.id] ?? 0) }
+
+            let wordA = words[0]
+            // Find word B with similar Elo to wordA
+            let remaining = words.dropFirst().sorted { abs($0.eloScore - wordA.eloScore) < abs($1.eloScore - wordA.eloScore) }
+            guard let wordB = remaining.first else { return nil }
+
+            return (wordA, wordB)
+        } catch {
+            print("Failed to fetch pair: \(error)")
+            return nil
+        }
+    }
+
+    func recordEloComparison(wordAId: Int64, wordBId: Int64, winnerId: Int64) {
+        guard let db = db else { return }
+        let now = ISO8601DateFormatter().string(from: Date())
+
+        do {
+            // Fetch current Elo scores
+            guard let rowA = try db.pluck(wordsTable.filter(id == wordAId)),
+                  let rowB = try db.pluck(wordsTable.filter(id == wordBId)) else { return }
+
+            let eloA = rowA[eloScore]
+            let eloB = rowB[eloScore]
+            let K = 32.0
+
+            let expectedA = 1.0 / (1.0 + pow(10.0, (eloB - eloA) / 400.0))
+            let expectedB = 1.0 / (1.0 + pow(10.0, (eloA - eloB) / 400.0))
+
+            let resultA = winnerId == wordAId ? 1.0 : 0.0
+            let resultB = winnerId == wordBId ? 1.0 : 0.0
+
+            let newEloA = eloA + K * (resultA - expectedA)
+            let newEloB = eloB + K * (resultB - expectedB)
+
+            // Update Elo scores
+            try db.run(wordsTable.filter(id == wordAId).update(eloScore <- newEloA))
+            try db.run(wordsTable.filter(id == wordBId).update(eloScore <- newEloB))
+
+            // Record comparison
+            try db.run(eloComparisonsTable.insert(
+                elo_word_a_id <- wordAId,
+                elo_word_b_id <- wordBId,
+                elo_winner_id <- winnerId,
+                elo_created_at <- now
+            ))
+        } catch {
+            print("Failed to record Elo comparison: \(error)")
+        }
+    }
+
+    func countEloComparisons() -> Int {
+        guard let db = db else { return 0 }
+        do {
+            return try db.scalar(eloComparisonsTable.count)
+        } catch {
+            return 0
+        }
+    }
+
+    func fetchTopWords(limit: Int = 5) -> [Word] {
+        guard let db = db else { return [] }
+        do {
+            let query = wordsTable.order(eloScore.desc).limit(limit)
+            return try db.prepare(query).map { row in
+                Word(id: row[id], name: row[word], rank: row[rank], isNotable: row[notable], eloScore: row[eloScore])
+            }
+        } catch {
+            return []
+        }
+    }
+
+    // MARK: - Pattern Rankings (Mode 3)
+
+    func savePatternRankings(_ patterns: [(pattern: String, example: String, confidence: Double)]) {
+        guard let db = db else { return }
+        let now = ISO8601DateFormatter().string(from: Date())
+        do {
+            // Clear existing rankings and re-save
+            try db.run(patternRankingsTable.delete())
+            for p in patterns {
+                try db.run(patternRankingsTable.insert(
+                    pattern_name <- p.pattern,
+                    pattern_example <- p.example,
+                    pattern_confidence <- p.confidence,
+                    pattern_created_at <- now
+                ))
+            }
+        } catch {
+            print("Failed to save pattern rankings: \(error)")
+        }
+    }
+
+    func fetchPatternRankings() -> [(id: Int64, pattern: String, example: String, confidence: Double)] {
+        guard let db = db else { return [] }
+        do {
+            return try db.prepare(patternRankingsTable.order(pattern_confidence.desc)).map { row in
+                (id: row[pattern_id], pattern: row[pattern_name], example: row[pattern_example], confidence: row[pattern_confidence])
+            }
+        } catch {
+            return []
+        }
+    }
+
+    // MARK: - Association Chains (Mode 5)
+
+    func addChainLink(fromWord: String, toWord: String, label: String = "reminds me of", chainUUID: String, position: Int) {
+        guard let db = db else { return }
+        let now = ISO8601DateFormatter().string(from: Date())
+        do {
+            try db.run(associationChainsTable.insert(
+                chain_from_word <- fromWord,
+                chain_to_word <- toWord,
+                chain_label <- label,
+                chain_id <- chainUUID,
+                chain_position <- Int64(position),
+                chain_created_at <- now
+            ))
+            // Auto-add both words to fullwords
+            insertWordFromDump(fromWord, wordSource: "association_chain")
+            insertWordFromDump(toWord, wordSource: "association_chain")
+        } catch {
+            print("Failed to add chain link: \(error)")
+        }
+    }
+
+    func fetchChain(chainUUID: String) -> [(from: String, to: String, label: String)] {
+        guard let db = db else { return [] }
+        do {
+            let query = associationChainsTable.filter(chain_id == chainUUID).order(chain_position.asc)
+            return try db.prepare(query).map { row in
+                (from: row[chain_from_word], to: row[chain_to_word], label: row[chain_label])
+            }
+        } catch {
+            return []
+        }
+    }
+
+    func fetchAllChainIds() -> [String] {
+        guard let db = db else { return [] }
+        do {
+            let query = associationChainsTable.select(distinct: chain_id)
+            return try db.prepare(query).map { $0[chain_id] }
+        } catch {
+            return []
+        }
+    }
+
+    // MARK: - Word Operations (existing + enhanced)
+
+    func fetchUnreviewedWords(batchSize: Int) -> [Word] {
+        guard let db = db else { return [] }
+        do {
+            let query = wordsTable.filter(reviewed == false).order(SQLite.Expression<Int64>.random()).limit(batchSize)
+            return try db.prepare(query).map { row in
+                Word(id: row[id], name: row[word], rank: row[rank], isNotable: row[notable], eloScore: row[eloScore])
+            }
+        } catch {
+            print("Fetch failed: \(error)")
+            return []
+        }
+    }
+
+    func fetchAllWords() -> [Word] {
+        guard let db = db else { return [] }
+        do {
+            return try db.prepare(wordsTable.order(eloScore.desc)).map { row in
+                Word(id: row[id], name: row[word], rank: row[rank], isNotable: row[notable], eloScore: row[eloScore])
+            }
+        } catch {
+            return []
+        }
+    }
+
+    func updateWord(word: Word) {
+        let wordRow = wordsTable.filter(self.word == word.name)
+        do {
+            let isReviewed = word.rank != 0.5 && (word.rank > 0.500001 || word.rank < 0.49999)
+            try db?.run(wordRow.update(self.rank <- word.rank, self.notable <- word.isNotable, self.reviewed <- isReviewed))
+        } catch {
+            print("Update failed for \(word.name): \(error)")
+        }
+    }
+
+    func countReviewedWords() -> Int {
+        do { return try db?.scalar(wordsTable.filter(reviewed == true).count) ?? 0 }
+        catch { return 0 }
+    }
+
+    func countUnreviewedWords() -> Int {
+        do { return try db?.scalar(wordsTable.filter(reviewed == false).count) ?? 0 }
+        catch { return 0 }
+    }
+
+    func countTotalWords() -> Int {
+        do { return try db?.scalar(wordsTable.count) ?? 0 }
+        catch { return 0 }
+    }
+
+    func searchWords(query: String) -> [Word] {
+        guard let db = db else { return [] }
+        do {
+            let queryPattern = "%\(query.lowercased())%"
+            let filteredWords = wordsTable.filter(word.like(queryPattern))
+            return try db.prepare(filteredWords).map { row in
+                Word(id: row[id], name: row[word], rank: row[rank], isNotable: row[notable], eloScore: row[eloScore])
+            }
+        } catch {
+            return []
+        }
+    }
+
+    // MARK: - Associations & Recordings
 
     func addWordAssociation(mainWordId: Int64, text: String, isStarred: Bool) throws {
         guard let assocDB = self.associationsDb else {
@@ -114,7 +531,6 @@ class DatabaseManager {
             assoc_created_at <- Date()
         )
         try assocDB.run(insert)
-        print("Added word association for mainWordId: \(mainWordId)")
     }
 
     func saveAudioRecording(mainWordId: Int64, audioFilename: String, transcript: String?, isStarred: Bool) throws {
@@ -129,226 +545,48 @@ class DatabaseManager {
             rec_created_at <- Date()
         )
         try assocDB.run(insert)
-        print("Saved audio recording for mainWordId: \(mainWordId)")
     }
 
+    // MARK: - Export (P7)
 
-    // Centralized function for the database path
-     func databasePath() -> String {
-        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-        let documentsDirectory = paths[0]
-        // Remove the extra "db.sqlite3" from the path here
-        return documentsDirectory.appendingPathComponent("db_full_words.sqlite3").path
-    }
-
-    private func setupDatabase() {
+    func exportToJSON() -> Data? {
+        guard let db = db else { return nil }
         do {
-            let path = databasePath()  // Use the centralized function
-            db = try Connection(path)
-        } catch {
-            print("Unable to set up database: \(error)")
-        }
-    }
-
-    func printTableSchema(tableName: String) {
-            do {
-                guard let db = db else {
-                    print("Database connection is nil.")
-                    return
-                }
-
-                let pragmaQuery = "PRAGMA table_info(\(tableName));"
-                let statement = try db.prepare(pragmaQuery)
-
-                for row in statement {
-                    // Assuming the column names in the result are 'name', 'type', 'notnull', 'dflt_value', 'pk' based on SQLite's documentation
-                    if let name = row[0], let type = row[1], let notnull = row[2], let dflt_value = row[3], let pk = row[4] {
-                        print("Column name: \(name), Type: \(type), Not null: \(notnull), Default Value: \(dflt_value), Primary Key: \(pk)")
-                    }
-                }
-            } catch {
-                print("Failed to query table schema: \(error)")
+            var seeds: [[String: Any]] = []
+            let query = wordsTable.order(eloScore.desc)
+            for row in try db.prepare(query) {
+                let elo = row[eloScore]
+                let priority: Int = elo > 1500 ? 3 : (elo > 1200 ? 2 : 1)
+                seeds.append([
+                    "word": row[word],
+                    "elo_score": elo,
+                    "priority": priority,
+                    "source": row[source] ?? "free_association",
+                    "notes": ""
+                ])
             }
 
-        }
-
-    private func createWordsTable() {
-        let createTable = wordsTable.create(ifNotExists: true) { table in
-            table.column(id, primaryKey: .autoincrement)
-            table.column(word, unique: true)
-            table.column(rank)
-            table.column(notable, defaultValue: false)
-            table.column(reviewed, defaultValue: false)
-        }
-
-        do {
-            try db?.run(createTable)
-            print("Created table or already exists.")
-        } catch {
-            print("Failed to create table: \(error)")
-        }
-
-        printTableSchema(tableName : "fullwords")
-    }
-
-    private func populateInitialDataIfNeeded() {
-        let alreadyPopulated = UserDefaults.standard.bool(forKey: "isDatabasePopulated")
-        if !alreadyPopulated {
-            populateInitialData()
-            UserDefaults.standard.set(true, forKey: "isDatabasePopulated")
-        }
-    }
-
-    private func insertWordIfNotExists(name: String, rank: Double) throws {
-        let insert = wordsTable.insert(or: .ignore, word <- name, self.rank <- rank, reviewed <- false)
-        try db?.run(insert)
-    }
-
-    func fetchUnreviewedWords(batchSize: Int) -> [Word] {
-        do {
-            guard let db = db else {
-                print("Database connection is nil.")
-                return []
+            var patterns: [[String: Any]] = []
+            for row in try db.prepare(patternRankingsTable.order(pattern_confidence.desc)) {
+                patterns.append([
+                    "pattern": row[pattern_name],
+                    "example": row[pattern_example],
+                    "confidence": row[pattern_confidence]
+                ])
             }
 
-            // Use SQL's random() function directly in the order clause
-            let query = wordsTable.filter(reviewed == false).order(SQLite.Expression<Int64>.random()).limit(batchSize)
-            let rows = try db.prepare(query)
-            var result: [Word] = []
-            for row in rows {
-                let wordItem = Word(
-                    id: row[id],
-                    name: row[word],
-                    rank: row[rank],
-                    isNotable: row[notable]
-                )
-                result.append(wordItem)
-            }
-            return result
+            let exportData: [String: Any] = [
+                "version": 1,
+                "exported_from": "ranker",
+                "exported_at": ISO8601DateFormatter().string(from: Date()),
+                "seeds": seeds,
+                "patterns": patterns
+            ]
+
+            return try JSONSerialization.data(withJSONObject: exportData, options: [.prettyPrinted, .sortedKeys])
         } catch {
-            print("Fetch failed: \(error)")
-            return []
+            print("Export failed: \(error)")
+            return nil
         }
     }
-
-    func updateWord(word: Word) {
-        print("update word")
-        let wordRow = wordsTable.filter(self.word == word.name)
-        print("wordRow is \(wordRow)")
-        do {
-
-            let isReviewed: Bool = (word.rank != 0.5 && (word.rank > 0.500001 || word.rank < 0.49999))
-            print("isReviewed \(isReviewed)")
-
-            if try db?.run(wordRow.update(self.rank <- word.rank,  self.notable <- word.isNotable, self.reviewed <- isReviewed)) ?? 0 > 0 {
-                print("Updated word: \(word.name)")
-            } else {
-                print("Word not found: \(word.name)")
-            }
-        } catch {
-            print("Update failed for \(word.name): \(error)")
-        }
-    }
-
-    func countReviewedWords() -> Int {
-        do {
-            let count = try db?.scalar(wordsTable.filter(reviewed == true).count) ?? 0
-            return count
-        } catch {
-            print("Count reviewed words failed: \(error)")
-            return 0
-        }
-    }
-
-    func countUnreviewedWords() -> Int {
-        do {
-            let count = try db?.scalar(wordsTable.filter(reviewed == false).count) ?? 0
-            return count
-        } catch {
-            print("Count unreviewed words failed: \(error)")
-            return 0
-        }
-    }
-
-    private func populateInitialData() {
-        do {
-            try db?.transaction {
-                // List of 100 dummy words to prepopulate the database
-                let dummyWords = [
-                    "alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta", "iota", "kappa",
-                    "lambda", "mu", "nu", "xi", "omicron", "pi", "rho", "sigma", "tau", "upsilon",
-                    "phi", "chi", "psi", "omega", "apple", "banana", "cherry", "date", "elderberry", "fig",
-                    "grape", "honeydew", "kiwi", "lemon", "mango", "nectarine", "orange", "papaya", "quince", "raspberry",
-                    "strawberry", "tangerine", "ugli", "vanilla", "watermelon", "xigua", "yam", "zucchini", "almond", "basil",
-                    "cinnamon", "dill", "elderflower", "fennel", "ginger", "horseradish", "ivy", "jasmine", "kumquat", "lime",
-                    "mint", "nutmeg", "oregano", "parsley", "quinoa", "rosemary", "sage", "thyme", "uva", "valerian",
-                    "walnut", "xanthan", "yarrow", "zatar", "azalea", "begonia", "cactus", "daffodil", "echinacea", "fern",
-                    "gardenia", "hibiscus", "iris", "jasmine", "kaffir", "lavender", "magnolia", "narcissus", "oak", "poppy"
-                ]
-
-                // Insert dummy words into the database
-                for word in dummyWords {
-                    try insertWordIfNotExists(name: word, rank: 0.5)
-                }
-            }
-            print("Dummy data populated successfully.")
-        } catch {
-            print("Failed to populate dummy data: \(error)")
-        }
-    }
-
-
-
-    // For word_associations table (in associations_db.sqlite3)
-    let associationsTable = Table("word_associations")
-    let assoc_id = SQLite.Expression<Int64>("id")
-    let assoc_main_word_id = SQLite.Expression<Int64>("main_word_id") // This ID refers to a word in the *other* database (fullwords.id)
-    let assoc_text = SQLite.Expression<String>("associated_text")
-    let assoc_is_starred = SQLite.Expression<Bool>("is_starred")
-    let assoc_created_at = SQLite.Expression<Date>("created_at")
-
-    // For audio_recordings table (in associations_db.sqlite3)
-    let recordingsTable = Table("audio_recordings")
-    let rec_id = SQLite.Expression<Int64>("id")
-    let rec_main_word_id = SQLite.Expression<Int64>("main_word_id") // Also refers to fullwords.id
-    let rec_audio_filename = SQLite.Expression<String>("audio_filename")
-    let rec_transcript_text = SQLite.Expression<String?>("transcript_text")
-    let rec_is_starred = SQLite.Expression<Bool>("is_starred")
-    let rec_created_at = SQLite.Expression<Date>("created_at")
-
-
-
-    //TODO TEMP. This function was imported. we are not sure we will use it yet
-    func searchWords(query: String) -> [Word] {
-        do {
-            guard let db = db else {
-                print("Database connection is nil.")
-                return []
-            }
-
-            let queryPattern = "%\(query.lowercased())%" // SQL LIKE pattern
-            let filteredWords = wordsTable.filter(word.like(queryPattern))
-
-            let rows = try db.prepare(filteredWords)
-            var result: [Word] = []
-            for row in rows {
-
-                let wordItem = Word(
-                    id: row[id],  // Add this line
-                    name: row[word],
-                    rank: row[rank],
-                    isNotable: row[notable]
-                )
-                result.append(wordItem)
-            }
-            return result
-        } catch {
-            print("Search failed: \(error)")
-            return []
-        }
-    }
-
-
-
-
 }

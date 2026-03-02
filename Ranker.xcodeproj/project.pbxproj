@@ -34,6 +34,10 @@
 		AE50AD305EC64BFFA048E2E4 /* DatabaseManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE50AF304D5E7C3AEC9E779A /* DatabaseManagerTests.swift */; };
 		AE50AE3D7DD55737BAE95B87 /* AssociatedIdeasViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE50A8E386106B950CDBD236 /* AssociatedIdeasViewTests.swift */; };
 		AE50AE6CF9F886A968A8D9A9 /* WordSorterViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE50AE0F6A13B6F8BA78F82C /* WordSorterViewModelTests.swift */; };
+		BB00000100000001DEADBEEF /* MemoryDumpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00000200000001DEADBEEF /* MemoryDumpView.swift */; };
+		BB00000300000001DEADBEEF /* EloRankingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00000400000001DEADBEEF /* EloRankingView.swift */; };
+		BB00000500000001DEADBEEF /* PatternRankingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00000600000001DEADBEEF /* PatternRankingView.swift */; };
+		BB00000700000001DEADBEEF /* ContextPrimingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00000800000001DEADBEEF /* ContextPrimingView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -84,6 +88,10 @@
 		AE50AB5808E59A60E940596C /* Test Instructions.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "Test Instructions.txt"; sourceTree = "<group>"; };
 		AE50AE0F6A13B6F8BA78F82C /* WordSorterViewModelTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WordSorterViewModelTests.swift; sourceTree = "<group>"; };
 		AE50AF304D5E7C3AEC9E779A /* DatabaseManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DatabaseManagerTests.swift; sourceTree = "<group>"; };
+		BB00000200000001DEADBEEF /* MemoryDumpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryDumpView.swift; sourceTree = "<group>"; };
+		BB00000400000001DEADBEEF /* EloRankingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EloRankingView.swift; sourceTree = "<group>"; };
+		BB00000600000001DEADBEEF /* PatternRankingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatternRankingView.swift; sourceTree = "<group>"; };
+		BB00000800000001DEADBEEF /* ContextPrimingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextPrimingView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -164,6 +172,10 @@
 				AE50A42F012A90B6109C8E88 /* AssociatedIdeasView.swift */,
 				AE50AB5808E59A60E940596C /* Test Instructions.txt */,
 				AA4B3CA3D15B518592E51823 /* SettingsView.swift */,
+				BB00000200000001DEADBEEF /* MemoryDumpView.swift */,
+				BB00000400000001DEADBEEF /* EloRankingView.swift */,
+				BB00000600000001DEADBEEF /* PatternRankingView.swift */,
+				BB00000800000001DEADBEEF /* ContextPrimingView.swift */,
 			);
 			path = Ranker;
 			sourceTree = "<group>";
@@ -350,6 +362,10 @@
 				AE50A10E9EDBA7C284FACBFA /* AssociatedIdeasView.swift in Sources */,
 				4410864F2C8D0FC7009890B1 /* RecorderWidgetView.swift in Sources */,
 				AA4B32174C1A1C90FEBE23BA /* SettingsView.swift in Sources */,
+				BB00000100000001DEADBEEF /* MemoryDumpView.swift in Sources */,
+				BB00000300000001DEADBEEF /* EloRankingView.swift in Sources */,
+				BB00000500000001DEADBEEF /* PatternRankingView.swift in Sources */,
+				BB00000700000001DEADBEEF /* ContextPrimingView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,35 +1,38 @@
 import SwiftUI
-// import SwiftData // This might not be used currently, but can stay
 
 @main
 struct RankerApp: App {
 
-
-
     var body: some Scene {
         WindowGroup {
-            NavigationView { // Keep the NavigationView wrapper for consistent styling
+            NavigationView {
                 TabView {
+                    MemoryDumpView()
+                        .tabItem {
+                            Image(systemName: "brain.head.profile")
+                            Text("Dump")
+                        }
+
                     WordSorterContentView()
                         .tabItem {
                             Image(systemName: "list.dash")
                             Text("Ranker")
                         }
 
-                    SearchView() // This should now refer to your newly renamed SearchView
+                    SearchView()
                         .tabItem {
                             Image(systemName: "magnifyingglass")
                             Text("Search")
                         }
 
-                    SettingsView() // We'll need to ensure SettingsView.swift exists from one of the branches
+                    SettingsView()
                         .tabItem {
                             Image(systemName: "gear")
                             Text("Settings")
                         }
                 }
             }
-            .navigationViewStyle(StackNavigationViewStyle()) // For iPad compatibility
+            .navigationViewStyle(StackNavigationViewStyle())
         }
     }
 }

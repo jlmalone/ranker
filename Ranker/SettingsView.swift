@@ -34,9 +34,15 @@ struct SettingsView: View {
                     }
                 }
 
-                Section("Data") {
-                    NavigationLink("Legacy Word Ranker") {
-                        WordSorterContentView()
+                Section("Advanced Modes") {
+                    NavigationLink("Elo Pair Ranking") {
+                        EloRankingView()
+                    }
+                    NavigationLink("Pattern Template Ranking") {
+                        PatternRankingView()
+                    }
+                    NavigationLink("Context Priming (2014)") {
+                        ContextPrimingView(showRanking: .constant(false))
                     }
                 }
             }

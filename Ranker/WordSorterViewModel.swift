@@ -1,50 +1,40 @@
-//  ranker/Ranker/WordSortedViewModel.swift
+//  ranker/Ranker/WordSorterViewModel.swift
 
-//WordSorterViewModel: Manages the words array for the main UI, loads new batches, and saves rankings.
-
+// Manages the words array for the main browser, loads batches, and saves rankings.
 
 import Foundation
 import Combine
 
-
 class WordSorterViewModel: ObservableObject {
-
-    // TODO i dont really understand the published annotation. I get the impression that references to it can change
-    // the value of it
     @Published var words: [Word] = []
-     @Published var dataVersion = 0 // Add this line
-
+    @Published var dataVersion = 0
+    @Published var reviewedCount = 0
+    @Published var unreviewedCount = 0
 
     private var databaseManager = DatabaseManager()
 
     init() {
         loadNextBatch()
+        refreshCounts()
     }
 
-
     func loadNextBatch() {
-        print("Load next batch")
         DispatchQueue.main.async {
-            print("Dispatch async")
-            self.words = self.databaseManager.fetchUnreviewedWords(batchSize: 20)
-            print("words are \(self.words)")
-            self.dataVersion += 1 // Increment to signal change
-            print("dataversion \(self.dataVersion)")
+            self.words = self.databaseManager.fetchUnreviewedWords(batchSize: 40)
+            self.dataVersion += 1
+            self.refreshCounts()
         }
     }
 
     func saveRankings() {
         for word in words {
             databaseManager.updateWord(word: word)
-            print("Saving \(word.name): \(word.rank)")
-
-            // Your logging code here
         }
         loadNextBatch()
     }
 
-
+    func refreshCounts() {
+        reviewedCount = databaseManager.countReviewedWords()
+        unreviewedCount = databaseManager.countUnreviewedWords()
+    }
 }
-
-
-

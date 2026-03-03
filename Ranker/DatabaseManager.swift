@@ -547,6 +547,40 @@ class DatabaseManager {
         try assocDB.run(insert)
     }
 
+    // MARK: - Fetch Associations & Recordings (for WordCaptureSheet)
+
+    func fetchAssociations(forWordId wordId: Int64) -> [(text: String, date: String)] {
+        guard let assocDB = self.associationsDb else { return [] }
+        do {
+            let query = associationsTable.filter(assoc_main_word_id == wordId).order(assoc_created_at.desc)
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateStyle = .short
+            dateFormatter.timeStyle = .short
+            return try assocDB.prepare(query).map { row in
+                (text: row[assoc_text], date: dateFormatter.string(from: row[assoc_created_at]))
+            }
+        } catch {
+            print("Failed to fetch associations: \(error)")
+            return []
+        }
+    }
+
+    func fetchRecordings(forWordId wordId: Int64) -> [(filename: String, transcript: String?, date: String)] {
+        guard let assocDB = self.associationsDb else { return [] }
+        do {
+            let query = recordingsTable.filter(rec_main_word_id == wordId).order(rec_created_at.desc)
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateStyle = .short
+            dateFormatter.timeStyle = .short
+            return try assocDB.prepare(query).map { row in
+                (filename: row[rec_audio_filename], transcript: row[rec_transcript_text], date: dateFormatter.string(from: row[rec_created_at]))
+            }
+        } catch {
+            print("Failed to fetch recordings: \(error)")
+            return []
+        }
+    }
+
     // MARK: - Export (P7)
 
     func exportToJSON() -> Data? {

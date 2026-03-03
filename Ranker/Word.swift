@@ -3,7 +3,7 @@
 
 import Foundation
 
-struct Word: Identifiable {
+struct Word: Identifiable, Hashable {
     let id: Int64
     let name: String
     var rank: Double

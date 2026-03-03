@@ -6,22 +6,16 @@ struct RankerApp: App {
     var body: some Scene {
         WindowGroup {
             TabView {
-                MemoryDumpView()
+                WordSorterContentView()
                     .tabItem {
-                        Image(systemName: "brain.head.profile")
-                        Text("Dump")
+                        Image(systemName: "slider.horizontal.3")
+                        Text("Browse")
                     }
 
-                RankingContainerView()
+                WordCorpusView()
                     .tabItem {
-                        Image(systemName: "arrow.left.arrow.right")
-                        Text("Ranker")
-                    }
-
-                PatternRankingView()
-                    .tabItem {
-                        Image(systemName: "textformat.abc")
-                        Text("Patterns")
+                        Image(systemName: "plus.rectangle.on.folder")
+                        Text("Add Words")
                     }
 
                 SearchView()
@@ -35,20 +29,6 @@ struct RankerApp: App {
                         Image(systemName: "gear")
                         Text("Settings")
                     }
-            }
-        }
-    }
-}
-
-struct RankingContainerView: View {
-    @State private var showRanking = false
-
-    var body: some View {
-        NavigationStack {
-            if showRanking {
-                EloRankingView()
-            } else {
-                ContextPrimingView(showRanking: $showRanking)
             }
         }
     }

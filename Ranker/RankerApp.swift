@@ -18,10 +18,10 @@ struct RankerApp: App {
                         Text("Add Words")
                     }
 
-                SearchView()
+                SearchRankView()
                     .tabItem {
                         Image(systemName: "magnifyingglass")
-                        Text("Search")
+                        Text("Search & Rank")
                     }
 
                 SettingsView()

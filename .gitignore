@@ -18,4 +18,5 @@ DerivedData/
 Pods/
 .symlinks/
 Ranker.xcodeproj/project.xcworkspace/xcuserdata/
-.idea/
+.idea/Ranker/db_full_words_bundled.sqlite3
+*.xcuserstate

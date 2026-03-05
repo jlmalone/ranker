@@ -1,6 +1,7 @@
 // WordCorpusView: Tab 2 — Load words into the system from multiple sources.
 
 import SwiftUI
+import UIKit
 import UniformTypeIdentifiers
 
 struct WordCorpusView: View {
@@ -112,6 +113,14 @@ struct WordCorpusView: View {
                 }
             }
             .navigationTitle("Add Words")
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") {
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    }
+                }
+            }
             .onAppear { viewModel.refresh() }
             .fileImporter(isPresented: $showFilePicker, allowedContentTypes: [.plainText, .json]) { result in
                 switch result {

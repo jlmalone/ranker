@@ -6,7 +6,7 @@ import AVFoundation
 import Speech
 
 struct WordCaptureSheet: View {
-    let word: Word
+    @State var word: Word
     let databaseManager: DatabaseManager
     var onDismiss: (() -> Void)?
 
@@ -35,23 +35,19 @@ struct WordCaptureSheet: View {
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.top, 8)
 
-                    // Rank indicator
-                    HStack {
-                        Text("Rank:")
-                            .foregroundColor(.secondary)
-                        GeometryReader { geo in
-                            ZStack(alignment: .leading) {
-                                Rectangle()
-                                    .fill(Color.gray.opacity(0.2))
-                                    .frame(height: 8)
-                                    .cornerRadius(4)
-                                Rectangle()
-                                    .fill(rankColor)
-                                    .frame(width: geo.size.width * word.rank, height: 8)
-                                    .cornerRadius(4)
-                            }
+                    // Rank slider
+                    VStack(spacing: 4) {
+                        HStack {
+                            Text("Rank:")
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text(String(format: "%.0f", word.rank * 100))
+                                .font(.system(.body, design: .monospaced))
+                                .fontWeight(.bold)
+                                .foregroundColor(rankColor)
                         }
-                        .frame(height: 8)
+                        CustomSlider(value: $word.rank)
+                            .frame(height: 24)
                     }
                     .padding(.horizontal)
 
@@ -183,7 +179,10 @@ struct WordCaptureSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") { onDismiss?() }
+                    Button("Done") {
+                        databaseManager.updateWord(word: word)
+                        onDismiss?()
+                    }
                 }
             }
             .onAppear {

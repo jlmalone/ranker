@@ -94,6 +94,15 @@ class DatabaseManager {
     private func setupDatabase() {
         do {
             let path = databasePath()
+
+            // On first launch, copy bundled database with 2.95M words
+            if !FileManager.default.fileExists(atPath: path) {
+                if let bundledPath = Bundle.main.path(forResource: "db_full_words_bundled", ofType: "sqlite3") {
+                    try FileManager.default.copyItem(atPath: bundledPath, toPath: path)
+                    print("Copied bundled database with 2.95M words to Documents")
+                }
+            }
+
             db = try Connection(path)
         } catch {
             print("Unable to set up database: \(error)")
@@ -456,6 +465,93 @@ class DatabaseManager {
 
     // MARK: - Word Operations (existing + enhanced)
 
+    func fetchUserAddedWords(batchSize: Int, offset: Int = 0) -> [Word] {
+        guard let db = db else { return [] }
+        do {
+            let query = wordsTable
+                .filter(source != "wikipedia+wiktionary" && source != nil)
+                .order(rank.desc)
+                .limit(batchSize, offset: offset)
+            return try db.prepare(query).map { row in
+                Word(id: row[id], name: row[word], rank: row[rank], isNotable: row[notable], eloScore: row[eloScore])
+            }
+        } catch {
+            return []
+        }
+    }
+
+    func countUserAddedWords() -> Int {
+        guard let db = db else { return 0 }
+        do {
+            return try db.scalar(wordsTable.filter(source != "wikipedia+wiktionary" && source != nil).count)
+        } catch { return 0 }
+    }
+
+    func fetchWordsWithNotes(batchSize: Int, offset: Int = 0) -> [Word] {
+        guard let db = db, let assocDB = associationsDb else { return [] }
+        do {
+            // Get word IDs that have associations
+            let wordIds = try assocDB.prepare(
+                associationsTable.select(distinct: assoc_main_word_id)
+            ).map { $0[assoc_main_word_id] }
+
+            guard !wordIds.isEmpty else { return [] }
+
+            let query = wordsTable
+                .filter(wordIds.contains(id))
+                .order(rank.desc)
+                .limit(batchSize, offset: offset)
+            return try db.prepare(query).map { row in
+                Word(id: row[id], name: row[word], rank: row[rank], isNotable: row[notable], eloScore: row[eloScore])
+            }
+        } catch {
+            return []
+        }
+    }
+
+    func countWordsWithNotes() -> Int {
+        guard let assocDB = associationsDb else { return 0 }
+        do {
+            return try assocDB.scalar(associationsTable.select(assoc_main_word_id.distinct.count))
+        } catch { return 0 }
+    }
+
+    func fetchNotableWords(batchSize: Int, offset: Int = 0) -> [Word] {
+        guard let db = db else { return [] }
+        do {
+            let query = wordsTable
+                .filter(notable == true)
+                .order(rank.desc)
+                .limit(batchSize, offset: offset)
+            return try db.prepare(query).map { row in
+                Word(id: row[id], name: row[word], rank: row[rank], isNotable: row[notable], eloScore: row[eloScore])
+            }
+        } catch {
+            return []
+        }
+    }
+
+    func countNotableWords() -> Int {
+        guard let db = db else { return 0 }
+        do { return try db.scalar(wordsTable.filter(notable == true).count) }
+        catch { return 0 }
+    }
+
+    func fetchReviewedWords(batchSize: Int, offset: Int = 0) -> [Word] {
+        guard let db = db else { return [] }
+        do {
+            let query = wordsTable
+                .filter(reviewed == true)
+                .order(rank.desc)
+                .limit(batchSize, offset: offset)
+            return try db.prepare(query).map { row in
+                Word(id: row[id], name: row[word], rank: row[rank], isNotable: row[notable], eloScore: row[eloScore])
+            }
+        } catch {
+            return []
+        }
+    }
+
     func fetchUnreviewedWords(batchSize: Int) -> [Word] {
         guard let db = db else { return [] }
         do {
@@ -481,9 +577,10 @@ class DatabaseManager {
     }
 
     func updateWord(word: Word) {
-        let wordRow = wordsTable.filter(self.word == word.name)
+        let wordRow = wordsTable.filter(id == word.id)
         do {
-            let isReviewed = word.rank != 0.5 && (word.rank > 0.500001 || word.rank < 0.49999)
+            // Any slider movement away from 0.5 default = reviewed
+            let isReviewed = abs(word.rank - 0.5) > 0.001
             try db?.run(wordRow.update(self.rank <- word.rank, self.notable <- word.isNotable, self.reviewed <- isReviewed))
         } catch {
             print("Update failed for \(word.name): \(error)")
@@ -509,13 +606,76 @@ class DatabaseManager {
         guard let db = db else { return [] }
         do {
             let queryPattern = "%\(query.lowercased())%"
-            let filteredWords = wordsTable.filter(word.like(queryPattern))
+            let filteredWords = wordsTable.filter(word.like(queryPattern)).limit(200)
             return try db.prepare(filteredWords).map { row in
                 Word(id: row[id], name: row[word], rank: row[rank], isNotable: row[notable], eloScore: row[eloScore])
             }
         } catch {
             return []
         }
+    }
+
+    func searchWordsPaginated(query: String, batchSize: Int, offset: Int) -> [Word] {
+        guard let db = db else { return [] }
+        do {
+            let queryPattern = "%\(query.lowercased())%"
+            let filteredWords = wordsTable.filter(word.like(queryPattern))
+                .order(word.asc)
+                .limit(batchSize, offset: offset)
+            return try db.prepare(filteredWords).map { row in
+                Word(id: row[id], name: row[word], rank: row[rank], isNotable: row[notable], eloScore: row[eloScore])
+            }
+        } catch {
+            return []
+        }
+    }
+
+    func countSearchResults(query: String) -> Int {
+        guard let db = db else { return 0 }
+        do {
+            let queryPattern = "%\(query.lowercased())%"
+            return try db.scalar(wordsTable.filter(word.like(queryPattern)).count)
+        } catch {
+            return 0
+        }
+    }
+
+    // MARK: - Complexity Estimation
+
+    /// Returns [wordLength: count] for all words
+    func wordLengthDistribution() -> [Int: Int] {
+        guard let db = db else { return [:] }
+        do {
+            var dist: [Int: Int] = [:]
+            let rows = try db.prepare("SELECT LENGTH(word) as len, COUNT(*) as cnt FROM fullwords GROUP BY LENGTH(word)")
+            for row in rows {
+                let len = Int(row[0] as! Int64)
+                let cnt = Int(row[1] as! Int64)
+                dist[len] = cnt
+            }
+            return dist
+        } catch { return [:] }
+    }
+
+    /// Returns [wordLength: count] for active words (rank >= 0.06)
+    func activeWordLengthDistribution() -> [Int: Int] {
+        guard let db = db else { return [:] }
+        do {
+            var dist: [Int: Int] = [:]
+            let rows = try db.prepare("SELECT LENGTH(word) as len, COUNT(*) as cnt FROM fullwords WHERE rank >= 0.06 GROUP BY LENGTH(word)")
+            for row in rows {
+                let len = Int(row[0] as! Int64)
+                let cnt = Int(row[1] as! Int64)
+                dist[len] = cnt
+            }
+            return dist
+        } catch { return [:] }
+    }
+
+    func countActiveWords() -> Int {
+        guard let db = db else { return 0 }
+        do { return try db.scalar(wordsTable.filter(rank >= 0.06).count) }
+        catch { return 0 }
     }
 
     // MARK: - Associations & Recordings
@@ -587,15 +747,20 @@ class DatabaseManager {
         guard let db = db else { return nil }
         do {
             var seeds: [[String: Any]] = []
-            let query = wordsTable.order(eloScore.desc)
+            // Sort by slider rank (user sentiment) as primary, Elo as secondary
+            let query = wordsTable.order(rank.desc, eloScore.desc)
             for row in try db.prepare(query) {
+                let sliderRank = row[rank]
                 let elo = row[eloScore]
-                let priority: Int = elo > 1500 ? 3 : (elo > 1200 ? 2 : 1)
+                // Priority from slider rank: user's direct judgment is the source of truth
+                let priority: Int = sliderRank > 0.7 ? 3 : (sliderRank > 0.4 ? 2 : 1)
                 seeds.append([
                     "word": row[word],
+                    "rank": sliderRank,
                     "elo_score": elo,
                     "priority": priority,
                     "source": row[source] ?? "free_association",
+                    "reviewed": row[reviewed],
                     "notes": ""
                 ])
             }

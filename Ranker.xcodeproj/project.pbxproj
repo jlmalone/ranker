@@ -38,6 +38,10 @@
 		BB00000300000001DEADBEEF /* EloRankingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00000400000001DEADBEEF /* EloRankingView.swift */; };
 		BB00000500000001DEADBEEF /* PatternRankingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00000600000001DEADBEEF /* PatternRankingView.swift */; };
 		BB00000700000001DEADBEEF /* ContextPrimingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00000800000001DEADBEEF /* ContextPrimingView.swift */; };
+		CC00000200000001DEADBE01 /* db_full_words_bundled.sqlite3 in Resources */ = {isa = PBXBuildFile; fileRef = CC00000100000001DEADBE01 /* db_full_words_bundled.sqlite3 */; };
+		CC00000300000001DEADBE02 /* WordCorpusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC00000400000001DEADBE02 /* WordCorpusView.swift */; };
+		CC00000500000001DEADBE03 /* WordCaptureSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC00000600000001DEADBE03 /* WordCaptureSheet.swift */; };
+		CC00000700000001DEADBE04 /* SearchRankView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC00000800000001DEADBE04 /* SearchRankView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -92,6 +96,10 @@
 		BB00000400000001DEADBEEF /* EloRankingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EloRankingView.swift; sourceTree = "<group>"; };
 		BB00000600000001DEADBEEF /* PatternRankingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatternRankingView.swift; sourceTree = "<group>"; };
 		BB00000800000001DEADBEEF /* ContextPrimingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextPrimingView.swift; sourceTree = "<group>"; };
+		CC00000100000001DEADBE01 /* db_full_words_bundled.sqlite3 */ = {isa = PBXFileReference; lastKnownFileType = file; path = db_full_words_bundled.sqlite3; sourceTree = "<group>"; };
+		CC00000400000001DEADBE02 /* WordCorpusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordCorpusView.swift; sourceTree = "<group>"; };
+		CC00000600000001DEADBE03 /* WordCaptureSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordCaptureSheet.swift; sourceTree = "<group>"; };
+		CC00000800000001DEADBE04 /* SearchRankView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchRankView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -176,6 +184,10 @@
 				BB00000400000001DEADBEEF /* EloRankingView.swift */,
 				BB00000600000001DEADBEEF /* PatternRankingView.swift */,
 				BB00000800000001DEADBEEF /* ContextPrimingView.swift */,
+				CC00000100000001DEADBE01 /* db_full_words_bundled.sqlite3 */,
+				CC00000400000001DEADBE02 /* WordCorpusView.swift */,
+				CC00000600000001DEADBE03 /* WordCaptureSheet.swift */,
+				CC00000800000001DEADBE04 /* SearchRankView.swift */,
 			);
 			path = Ranker;
 			sourceTree = "<group>";
@@ -322,6 +334,7 @@
 				44ACF60D2BBB38F60076C786 /* Preview Assets.xcassets in Resources */,
 				44ACF60A2BBB38F60076C786 /* Assets.xcassets in Resources */,
 				AE50A0F08E51E1B89D164364 /* Test Instructions.txt in Resources */,
+				CC00000200000001DEADBE01 /* db_full_words_bundled.sqlite3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -366,6 +379,9 @@
 				BB00000300000001DEADBEEF /* EloRankingView.swift in Sources */,
 				BB00000500000001DEADBEEF /* PatternRankingView.swift in Sources */,
 				BB00000700000001DEADBEEF /* ContextPrimingView.swift in Sources */,
+				CC00000300000001DEADBE02 /* WordCorpusView.swift in Sources */,
+				CC00000500000001DEADBE03 /* WordCaptureSheet.swift in Sources */,
+				CC00000700000001DEADBE04 /* SearchRankView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

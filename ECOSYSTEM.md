@@ -452,6 +452,7 @@ SQLite requires platform-specific libraries (SQLite.swift on iOS, sql.js on web,
 | **Physical notebooks (photographed + OCR'd)** | TBD | **Planned (2.6)** | Photograph every page of personal notebooks from 2014 era. OCR extract all handwritten text. |
 | **Books read (full text extraction)** | TBD | **Planned (2.7)** | Extract unique words from every book read before/during 2014. Sources: Kindle library, epub files on drives, Project Gutenberg for public domain titles. Character names, place names, memorable phrases. |
 | **Film/TV transcripts** | TBD | **Planned (2.8)** | Screenplays and subtitles of films/TV watched before 2014. Sources: OpenSubtitles, IMSDB, local .srt files. Character names, catchphrases, memorable dialogue. Cross-reference with Ridulian's existing transcript corpus. |
+| **Communications (all platforms)** | TBD | **Planned (2.9)** | WhatsApp, WeChat, Signal, Google Voice, iMessage, Telegram, Snapchat, FB Messenger. Contact names + message text. WhatsLiberation already extracts WhatsApp. |
 | AI-assisted brain mining sessions | User-generated | **Planned (Phase 1+)** | Long conversations with LLM to surface subconscious associations, contextual memory from 2014 |
 | Combo generation + re-ranking | Derived | **Planned (Phase 1+)** | Top solo words × connector phrases, ranked by user judgment |
 
@@ -639,6 +640,7 @@ The final extraction and scoring stage that produces candidates for Ranker.
 | 2.6 complete | Image OCR words extracted | Handwriting, screenshots, notebooks |
 | 2.7 complete | Book corpus words extracted | Every book read pre-2014 |
 | 2.8 complete | Film/TV transcript words extracted | Dialogue, character names, catchphrases |
+| 2.9 complete | Communications contacts + messages extracted | Names, nicknames, conversational words |
 
 ### 2.6 — Image OCR & Handwritten Notebook Mining
 
@@ -713,6 +715,44 @@ ORDER BY path;
 **Cross-reference with Cinemaphile:** Use the existing movie catalog to build a viewing history timeline. Prioritize films watched in 2013–2014 window.
 
 **Output:** Extracted words → `source = "film_transcript"` in Ranker DB
+
+### 2.9 — Communications Mining (Contacts + Message Transcripts)
+
+> **Goal:** Extract every contact name and message text from all communications platforms. People's names, nicknames, pet names, inside jokes, and frequently used words in conversation are prime password material.
+
+**Platforms & extraction methods:**
+
+| Platform | Data Source | Extraction Method |
+|----------|-----------|-------------------|
+| **WhatsApp** | WhatsLiberation project (`~/IdeaProjects/WhatsLiberation/`) | ADB export already built — extracts chat DBs from Android. Parse `msgstore.db` (SQLite) for message text + contact names |
+| **WeChat** | Local backups or ADB pull | WeChat stores messages in EnMicroMsg.db (SQLite, encrypted with IMEI-derived key). Decrypt with known tools, extract text + contacts |
+| **Signal** | Desktop: `~/Library/Application Support/Signal/sql/db.sqlite` | SQLite DB, encrypted with key from `config.json`. Decrypt and extract conversations |
+| **Google Voice** | Google Takeout export | Exports as HTML files with call/SMS/voicemail transcripts. Parse HTML with Jsoup |
+| **iMessage** | `~/Library/Messages/chat.db` | SQLite DB, accessible on macOS directly. Extract message text + contact handles |
+| **SMS/MMS** | Android backup via ADB or Google Takeout | XML format (SMS Backup & Restore app) or Takeout HTML |
+| **Telegram** | Desktop: `~/Library/Group Containers/*/Telegram/` or Takeout export | JSON export via Telegram settings → export chat history |
+| **Snapchat** | Snapchat data download (account settings) | JSON export with message history |
+| **Facebook Messenger** | Facebook data download | JSON export with full message history |
+| **Email contacts** | Google Contacts export (vCard/CSV) | Names, nicknames, company names, email local parts |
+
+**Extraction targets:**
+- **Contact names** — first names, last names, nicknames, display names. Every person you've communicated with is a potential password word
+- **Message text** — tokenize all messages, extract unique words. Weight by frequency and era (2013-2015 priority)
+- **Group chat names** — often memorable/creative words
+- **Shared links/media filenames** — URLs, file names shared in chats
+- **Voicemail transcripts** — Google Voice auto-transcribes voicemails
+
+**Cross-project reuse:**
+- **WhatsLiberation** already has ADB-based WhatsApp extraction — reuse directly
+- **Intelligram/ETLigram** has ADB infrastructure for pulling Android app data
+- **Godfather** has Puppeteer automation if web exports need scripting
+
+**Priority:**
+- Contacts from ALL platforms — small dataset, huge value (names are top password candidates)
+- Message text from 2013–2015 window first
+- Then expand to full message history for frequency analysis
+
+**Output:** Contact names → `source = "contacts"`, message words → `source = "messages_[platform]"` in Ranker DB
 
 ---
 

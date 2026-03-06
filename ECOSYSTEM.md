@@ -432,9 +432,28 @@ SQLite requires platform-specific libraries (SQLite.swift on iOS, sql.js on web,
 
 ## Phase 2: Digital Archive Mining
 
-> **Goal:** Mine 20 years of digital history — Gmail, Google Drive, local documents across multiple drives — to surface forgotten words, phrases, and patterns from the 2014 era. Feed everything into Ranker for human judgment.
+> **Goal:** Mine 20 years of digital history — Gmail, Google Drive, local documents, images, books, films — to surface forgotten words, phrases, and patterns from the 2014 era. Feed everything into Ranker for human judgment.
+
+**Core principle:** Every word you have ever read, written, or spoken is a potential password candidate. The corpus must be as exhaustive as possible. Wikipedia/Wiktionary (8.96M words) is the baseline vocabulary. Your personal archive is where the password actually lives.
 
 **Key constraint:** This is a massive pipeline. Each sub-phase has clear gates so it can be built incrementally. The Document Triage UI (2.1) is the minimum viable starting point — even before text extraction works, being able to browse and tag documents from CHOAM's catalog has standalone value.
+
+### Planned Word Sources (Priority Order)
+
+| Source | Est. Unique Words | Status | Notes |
+|--------|------------------|--------|-------|
+| Wikipedia + Wiktionary (EN/FR/ES/LA) | 8.96M | **DONE** | Bundled in Ranker DB, strict ASCII, no accents |
+| password_roots.txt | 1,720 | **DONE** | Common password base words |
+| Memory Dump sessions | User-generated | **ACTIVE** | 6 guided prompts, words auto-extracted |
+| Gmail archive (Google Takeout MBOX) | TBD | Planned (2.2) | Primary window: Jun–Sep 2014 |
+| Google Drive documents | TBD | Planned (2.3) | Docs, Sheets, Keep notes |
+| Local documents (CHOAM-indexed drives) | TBD | Planned (2.4) | txt, pdf, docx across AGENTMINI1, ALPHA, etc. |
+| **OCR of all images containing text** | TBD | **Planned (2.6)** | Screenshots, photos of notebooks, whiteboards, sticky notes. Use Apple Vision/Tesseract. Prioritize 2013-2015 era photos. Search CHOAM for .jpg/.png on all drives. |
+| **Physical notebooks (photographed + OCR'd)** | TBD | **Planned (2.6)** | Photograph every page of personal notebooks from 2014 era. OCR extract all handwritten text. |
+| **Books read (full text extraction)** | TBD | **Planned (2.7)** | Extract unique words from every book read before/during 2014. Sources: Kindle library, epub files on drives, Project Gutenberg for public domain titles. Character names, place names, memorable phrases. |
+| **Film/TV transcripts** | TBD | **Planned (2.8)** | Screenplays and subtitles of films/TV watched before 2014. Sources: OpenSubtitles, IMSDB, local .srt files. Character names, catchphrases, memorable dialogue. Cross-reference with Ridulian's existing transcript corpus. |
+| AI-assisted brain mining sessions | User-generated | **Planned (Phase 1+)** | Long conversations with LLM to surface subconscious associations, contextual memory from 2014 |
+| Combo generation + re-ranking | Derived | **Planned (Phase 1+)** | Top solo words × connector phrases, ranked by user judgment |
 
 ### 2.1 — Document Discovery (CHOAM Integration)
 
@@ -617,6 +636,83 @@ The final extraction and scoring stage that produces candidates for Ranker.
 | 2.3 complete | Google Drive words extracted | Complements email |
 | 2.4 complete | Local document words extracted | Captures offline notes |
 | 2.5 complete | Unified word corpus scored & exported | Full pipeline feeds Ranker |
+| 2.6 complete | Image OCR words extracted | Handwriting, screenshots, notebooks |
+| 2.7 complete | Book corpus words extracted | Every book read pre-2014 |
+| 2.8 complete | Film/TV transcript words extracted | Dialogue, character names, catchphrases |
+
+### 2.6 — Image OCR & Handwritten Notebook Mining
+
+> **Goal:** Extract text from every image that contains writing — screenshots, photos of notebooks, whiteboards, sticky notes, handwritten lists. Passwords are often written down physically.
+
+**Image discovery (via CHOAM):**
+```sql
+SELECT path, filename, size FROM files
+WHERE extension IN ('jpg', 'jpeg', 'png', 'heic', 'tiff', 'bmp')
+AND size > 50000  -- skip thumbnails
+ORDER BY path;
+```
+
+**OCR stack options (all local, no cloud):**
+- **Apple Vision framework** (Swift, on-device) — best for iOS/macOS, handles handwriting
+- **Tesseract** via `tesseract-ocr` CLI or `SwiftyTesseract` — cross-platform, many language models
+- **Ridulian's existing OCR pipeline** — already does frame analysis with LLM, may be reusable
+
+**Priority targets:**
+- Photos from 2013–2015 (check EXIF dates)
+- Screenshots of browser windows, terminals, text editors
+- Photos of physical notebooks, sticky notes, whiteboards
+- Any image in folders named "passwords", "keys", "crypto", "notes", "personal"
+
+**Physical notebooks (manual step):**
+- Photograph every page of personal notebooks from the 2014 era
+- Run OCR on all pages
+- Handwriting recognition may need Apple Vision (better at cursive than Tesseract)
+- Extract words even if OCR confidence is low — include them with lower weight
+
+**Output:** Extracted words → `source = "ocr_image"` or `source = "ocr_notebook"` in Ranker DB
+
+### 2.7 — Book Corpus Mining
+
+> **Goal:** Extract unique words from every book read before or during 2014. Character names, place names, invented words, and memorable phrases are prime password material.
+
+**Sources:**
+- **Kindle library** — Amazon allows download of purchased books. Use Calibre to convert .azw/.mobi to txt/epub
+- **EPUB files on drives** — search CHOAM: `extension IN ('epub', 'mobi', 'azw', 'azw3', 'fb2')`
+- **PDF books on drives** — search CHOAM for large PDFs in book-like directories
+- **Project Gutenberg** — free full text of any public domain book read before 2014
+- **Personal reading list** — user recalls titles, download full texts
+
+**Extraction:**
+- EPUB: unzip, parse XHTML content files with Jsoup
+- MOBI/AZW: convert via Calibre CLI (`ebook-convert book.mobi book.txt`)
+- PDF: Apache PDFBox
+- Tokenize all text, extract unique words, proper nouns, invented/fantasy words
+
+**High-value targets:** Fantasy/sci-fi character names, place names from fiction, technical terms from non-fiction, foreign words from translated works
+
+**Output:** Extracted words → `source = "book_corpus"` in Ranker DB
+
+### 2.8 — Film & TV Transcript Mining
+
+> **Goal:** Extract unique words from screenplays, subtitles, and transcripts of every film and TV show watched before 2014. Character names and memorable dialogue are common password roots.
+
+**Sources:**
+- **Local .srt/.sub files** — search CHOAM: `extension IN ('srt', 'sub', 'ass', 'ssa', 'vtt')`
+- **Ridulian transcript corpus** — already has whisper-extracted transcripts on M4/PROMETHEUS
+- **OpenSubtitles.org** — bulk subtitle downloads by IMDB ID
+- **IMSDB.com / SimplyScripts** — full screenplays for major films
+- **Personal watch history** — cross-reference with Cinemaphile's 80K+ movie catalog
+
+**Extraction:**
+- SRT/VTT: strip timestamps, extract dialogue text
+- Screenplays: parse plain text, extract dialogue and character names
+- Ridulian transcripts: already in SQLite FTS5, query for unique words
+
+**High-value targets:** Character names (especially obscure/memorable ones), catchphrases, invented words (sci-fi/fantasy), place names from films, actor names from credits
+
+**Cross-reference with Cinemaphile:** Use the existing movie catalog to build a viewing history timeline. Prioritize films watched in 2013–2014 window.
+
+**Output:** Extracted words → `source = "film_transcript"` in Ranker DB
 
 ---
 

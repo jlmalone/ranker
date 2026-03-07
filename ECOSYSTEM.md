@@ -430,6 +430,57 @@ SQLite requires platform-specific libraries (SQLite.swift on iOS, sql.js on web,
 
 ---
 
+## Phase 1.5: Data Safety — Ranking Checkpoint System
+
+> **Non-negotiable:** Every ranking decision is irreplaceable human judgment. A single database corruption, bad migration, or botched git reset could destroy hours/days of careful work. Build automatic protection before doing serious ranking sessions.
+
+### Automatic Database Backups
+
+**On every app launch and every N saves, copy the live DB to a timestamped backup:**
+
+```
+~/Documents/ranker_backups/
+  db_full_words_2026-03-07T14-30-00.sqlite3
+  db_full_words_2026-03-07T15-45-22.sqlite3
+  associations_db_2026-03-07T14-30-00.sqlite3
+  ...
+```
+
+**Implementation (DatabaseManager):**
+- On `init()`: copy both `.sqlite3` files to backup directory with ISO8601 timestamp
+- After every 100 `updateWord()` calls: trigger a checkpoint backup
+- Keep last 20 backups, prune older ones automatically
+- Show "Last backup: 3 min ago" in Settings
+
+### iCloud / File Export Checkpoints
+
+- **Periodic JSON export:** Auto-export `ranker_export.json` every 500 rankings to a known folder (e.g., iCloud Drive or app Documents)
+- **Manual checkpoint button** in Settings: "Save Checkpoint Now" — creates a named backup the user can label ("after first 2000 eliminations")
+- **Restore from checkpoint** in Settings: pick any backup to restore from
+
+### Git-Level Protection
+
+- Before any schema migration or destructive DB operation, copy the database file first
+- Never run `DROP TABLE` or `DELETE FROM fullwords` without a backup gate
+- The bundled `db_full_words_bundled.sqlite3` is the baseline — user can always re-derive from it, but **all ranking decisions would be lost**
+
+### What We're Protecting
+
+| Data | Source | Replaceable? |
+|------|--------|-------------|
+| Word ranks (0-1 slider values) | Human judgment | **NO** — hours of work |
+| Notable flags (stars) | Human judgment | **NO** |
+| Elo comparison history | Human judgment | **NO** |
+| Memory dump text | Human memory | **Partially** — can redo but may not recall same things |
+| Association chains | Human memory | **Partially** |
+| Voice transcripts + audio files | Human voice | **NO** — recordings are unique |
+| Pattern rankings | Human judgment | Easy to redo but annoying |
+| The 2.95M word corpus | Wikipedia/Wiktionary | YES — re-derive from bundled DB |
+
+**Priority:** Implement automatic backups BEFORE the next heavy ranking session. The cost of building this is 1-2 hours. The cost of losing ranking data is days of irreplaceable work.
+
+---
+
 ## Phase 2: Digital Archive Mining
 
 > **Goal:** Mine 20 years of digital history — Gmail, Google Drive, local documents, images, books, films — to surface forgotten words, phrases, and patterns from the 2014 era. Feed everything into Ranker for human judgment.

@@ -615,13 +615,15 @@ class DatabaseManager {
         }
     }
 
-    func searchWordsPaginated(query: String, batchSize: Int, offset: Int) -> [Word] {
+    func searchWordsPaginated(query: String, batchSize: Int, offset: Int, unrankedOnly: Bool = false) -> [Word] {
         guard let db = db else { return [] }
         do {
             let queryPattern = "%\(query.lowercased())%"
-            let filteredWords = wordsTable.filter(word.like(queryPattern))
-                .order(word.asc)
-                .limit(batchSize, offset: offset)
+            var filteredWords = wordsTable.filter(word.like(queryPattern))
+            if unrankedOnly {
+                filteredWords = filteredWords.filter(rank > 0.499 && rank < 0.501)
+            }
+            filteredWords = filteredWords.order(word.asc).limit(batchSize, offset: offset)
             return try db.prepare(filteredWords).map { row in
                 Word(id: row[id], name: row[word], rank: row[rank], isNotable: row[notable], eloScore: row[eloScore])
             }
@@ -630,11 +632,15 @@ class DatabaseManager {
         }
     }
 
-    func countSearchResults(query: String) -> Int {
+    func countSearchResults(query: String, unrankedOnly: Bool = false) -> Int {
         guard let db = db else { return 0 }
         do {
             let queryPattern = "%\(query.lowercased())%"
-            return try db.scalar(wordsTable.filter(word.like(queryPattern)).count)
+            var filter = wordsTable.filter(word.like(queryPattern))
+            if unrankedOnly {
+                filter = filter.filter(rank > 0.499 && rank < 0.501)
+            }
+            return try db.scalar(filter.count)
         } catch {
             return 0
         }

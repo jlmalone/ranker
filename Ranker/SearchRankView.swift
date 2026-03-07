@@ -7,6 +7,7 @@ struct SearchRankView: View {
     @StateObject private var viewModel = SearchRankViewModel()
     @State private var searchText = ""
     @State private var maxWidth: CGFloat = 100
+    @State private var showAllRanked = false
     @FocusState private var searchFocused: Bool
 
     var body: some View {
@@ -42,6 +43,22 @@ struct SearchRankView: View {
                     .disabled(searchText.trimmingCharacters(in: .whitespaces).count < 2)
                 }
                 .padding()
+
+                // Unranked-only toggle
+                Toggle(isOn: Binding(
+                    get: { !showAllRanked },
+                    set: { newValue in
+                        showAllRanked = !newValue
+                        if !searchText.trimmingCharacters(in: .whitespaces).isEmpty {
+                            performSearch()
+                        }
+                    }
+                )) {
+                    Text("Unranked only")
+                        .font(.subheadline)
+                }
+                .padding(.horizontal)
+                .padding(.bottom, 4)
 
                 // Results info — tap to dismiss keyboard
                 if viewModel.totalMatches > 0 {
@@ -155,7 +172,7 @@ struct SearchRankView: View {
         let query = searchText.trimmingCharacters(in: .whitespaces)
         guard query.count >= 2 else { return }
         maxWidth = 100
-        viewModel.search(query: query)
+        viewModel.search(query: query, unrankedOnly: !showAllRanked)
     }
 }
 
@@ -167,15 +184,17 @@ class SearchRankViewModel: ObservableObject {
     private let databaseManager = DatabaseManager()
     private let batchSize = 40
     private var currentQuery = ""
+    private var unrankedOnly = true
 
     var totalPages: Int {
         max(1, Int(ceil(Double(totalMatches) / Double(batchSize))))
     }
 
-    func search(query: String) {
+    func search(query: String, unrankedOnly: Bool = true) {
         currentQuery = query
+        self.unrankedOnly = unrankedOnly
         currentPage = 0
-        totalMatches = databaseManager.countSearchResults(query: query)
+        totalMatches = databaseManager.countSearchResults(query: query, unrankedOnly: unrankedOnly)
         loadPage()
     }
 
@@ -215,7 +234,8 @@ class SearchRankViewModel: ObservableObject {
         words = databaseManager.searchWordsPaginated(
             query: currentQuery,
             batchSize: batchSize,
-            offset: offset
+            offset: offset,
+            unrankedOnly: unrankedOnly
         )
     }
 }
